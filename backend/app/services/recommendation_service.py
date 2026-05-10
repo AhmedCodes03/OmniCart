@@ -9,7 +9,7 @@ TFIDF_PATH = os.path.join(ML_DIR, "tfidf_model.pkl")
 SENTIMENT_PATH = os.path.join(ML_DIR, "sentiment_model.pkl")
 
 # Debug path log (will show in Railway logs)
-print(f"🤖 ML Models Directory: {os.path.abspath(ML_DIR)}")
+print(f"ML Models Directory: {os.path.abspath(ML_DIR)}")
 
 _svd_model = None
 _tfidf_data = None

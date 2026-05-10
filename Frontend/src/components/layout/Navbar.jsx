@@ -118,13 +118,7 @@ export default function Navbar() {
               </Link>
 
               {/* Theme Sequencer */}
-              <button
-                onClick={toggleDarkMode}
-                className="w-12 h-12 rounded-[18px] glass border border-surface-200 dark:border-white/10 text-surface-600 dark:text-surface-300 hover:border-primary-500/50 hover:text-primary-500 transition-all duration-500 flex items-center justify-center relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-primary-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                {darkMode ? <Sun className="w-5 h-5 stroke-[2.5]" /> : <Moon className="w-5 h-5 stroke-[2.5]" />}
-              </button>
+
 
               {isAuthenticated ? (
                 <>

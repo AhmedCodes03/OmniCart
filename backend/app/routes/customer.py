@@ -17,11 +17,36 @@ from sqlalchemy import or_
 from ..extensions import db
 from ..models import Product, Category, Cart, Customer
 from ..middleware.role_required import role_required
+from ..services.openai_service import generate_product_description as ai_generate_description
 
 customer_bp = Blueprint("customer", __name__, url_prefix="/api")
 
 # Columns the user is allowed to sort by — prevents arbitrary attribute injection
 _SORT_WHITELIST = {"created_at", "price", "name"}
+
+
+# ===============================
+# AI GENERATOR
+# ===============================
+@customer_bp.route("/products/generate-description", methods=["POST"])
+@jwt_required()
+def generate_description():
+    data = request.get_json()
+    name = data.get("name", "Product")
+    brand = data.get("brand", "")
+    price = data.get("price", 0)
+    category_id = data.get("category_id")
+    
+    # Optional: fetch category name if you want to pass it to the AI
+    category_name = "Electronics"
+    if category_id:
+        cat = Category.query.get(category_id)
+        if cat:
+            category_name = cat.name
+            
+    desc = ai_generate_description(name, category_name, float(price), brand)
+    
+    return jsonify({"description": desc})
 
 
 # ===============================
