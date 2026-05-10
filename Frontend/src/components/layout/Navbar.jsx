@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Menu, X, Search, LogOut, LayoutDashboard, Package, ChevronDown, Sun, Moon, Globe, Cpu, Zap, Activity, ArrowRight } from 'lucide-react';
+import { User, Menu, X, Search, LogOut, LayoutDashboard, Package, ChevronDown, Sun, Moon, Globe, Cpu, Zap, Activity, ArrowRight, ShoppingCart } from 'lucide-react';
 import OmniCartIcon from '../common/OmniCartIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';

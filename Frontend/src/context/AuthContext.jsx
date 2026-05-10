@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import API from '../api/axios';
 
 const AuthContext = createContext(null);
@@ -56,8 +56,12 @@ export function AuthProvider({ children }) {
     localStorage.setItem('omnicart_user', JSON.stringify({ user: updatedUser, role }));
   };
 
+  const value = useMemo(() => ({
+    user, role, loading, login, register, logout, updateUser, isAuthenticated: !!user
+  }), [user, role, loading]);
+
   return (
-    <AuthContext.Provider value={{ user, role, loading, login, register, logout, updateUser, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

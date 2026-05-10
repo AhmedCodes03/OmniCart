@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import API from '../api/axios';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -86,11 +86,13 @@ export function CartProvider({ children }) {
     }
   };
 
+  const value = useMemo(() => ({
+    cart, cartTotal, cartCount, loading, 
+    addToCart, updateQuantity, removeFromCart, clearCart, fetchCart 
+  }), [cart, cartTotal, cartCount, loading, fetchCart]);
+
   return (
-    <CartContext.Provider value={{ 
-      cart, cartTotal, cartCount, loading, 
-      addToCart, updateQuantity, removeFromCart, clearCart, fetchCart 
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
