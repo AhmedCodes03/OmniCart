@@ -45,7 +45,8 @@ def seed():
     app = create_app()
 
     with app.app_context():
-        print("🌱 Seeding OmniCart database (idempotent)...")
+        print("🌱 Initializing Database and Seeding (idempotent)...")
+        db.create_all()
         print("=" * 50)
 
         # 1. Admins

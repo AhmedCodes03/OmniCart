@@ -12,7 +12,16 @@ def create_app():
     CORS(app)
 
     # Config
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "mysql+pymysql://root:omnicart@localhost/omnicart_db")
+    # Use 'or' instead of default to handle empty strings "", and strip whitespace
+    db_url = (os.getenv("DATABASE_URL") or "mysql+pymysql://root:omnicart@localhost/omnicart_db").strip()
+    
+    # Fix driver for Railway/Heroku if necessary
+    if db_url.startswith("mysql://"):
+        db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
+    
+    print(f"📡 Connecting to: {db_url.split('@')[-1]}") # Log host only for safety
+    
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-dev-secret")
 
