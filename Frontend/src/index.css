@@ -37,19 +37,21 @@
   --surface-100: #f8fafc;
   --surface-200: #f1f5f9;
   --surface-300: #e2e8f0;
-  --surface-400: #374150;
-  /* Darker for better contrast */
-  --surface-500: #4755691c;
-  /* Much darker for main text */
-  --surface-600: #3341555e;
-  --surface-950: #020617;
+  --surface-400: #64748b; /* Darker than before */
+  --surface-500: #475569; /* Much darker */
+  --surface-600: #334155; /* Sharp contrast */
+  --surface-700: #1e293b;
+  --surface-800: #0f172a;
+  --surface-900: #020617;
+  --surface-950: #000000;
 
-  --bg-app: #fbfcfe;
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  /* Higher opacity for light mode */
-  --glass-border: rgba(0, 0, 0, 0.12);
-  /* More defined borders */
+  --bg-app: #f8fafc;
+  --card-bg: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.1);
   --text-main: #0f172a;
+  --text-muted: #475569;
+  --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
 }
 
 .dark {
@@ -60,12 +62,22 @@
   --surface-50: #020617;
   --surface-100: #0f172a;
   --surface-200: #1e293b;
+  --surface-300: #334155;
+  --surface-400: #475569;
+  --surface-500: #64748b;
+  --surface-600: #94a3b8;
+  --surface-700: #cbd5e1;
+  --surface-800: #e2e8f0;
+  --surface-900: #f1f5f9;
   --surface-950: #ffffff;
 
   --bg-app: #02040a;
-  --glass-bg: rgba(10, 10, 15, 0.65);
+  --card-bg: #0c0e14;
+  --glass-bg: rgba(10, 10, 15, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
 }
 
 /* ─── Antigravity Core ─── */

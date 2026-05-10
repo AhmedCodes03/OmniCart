@@ -13,18 +13,12 @@
   isolation: isolate;
   transform: translate3d(0, 0, 0.01px);
   display: grid;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--glass-border);
   /* Subtle border */
-  background: var(--card-bg, #120F17);
-  /* Dark background */
+  background: var(--card-bg, #ffffff);
+  /* Theme-aware background */
   overflow: visible;
-  box-shadow:
-    rgba(0, 0, 0, 0.1) 0px 1px 2px,
-    rgba(0, 0, 0, 0.1) 0px 2px 4px,
-    rgba(0, 0, 0, 0.1) 0px 4px 8px,
-    rgba(0, 0, 0, 0.1) 0px 8px 16px,
-    rgba(0, 0, 0, 0.1) 0px 16px 32px,
-    rgba(0, 0, 0, 0.1) 0px 32px 64px;
+  box-shadow: var(--card-shadow);
 }
 
 .border-glow-card::before,
@@ -49,7 +43,7 @@
 .border-glow-card::before {
   border: 1px solid transparent;
   background:
-    linear-gradient(var(--card-bg, #120F17) 0 100%) padding-box,
+    linear-gradient(var(--card-bg) 0 100%) padding-box,
     linear-gradient(rgb(255 255 255 / 0%) 0% 100%) border-box,
     var(--gradient-one, radial-gradient(at 80% 55%, hsla(268, 100%, 76%, 1) 0px, transparent 50%)) border-box,
     var(--gradient-two, radial-gradient(at 69% 34%, hsla(349, 100%, 74%, 1) 0px, transparent 50%)) border-box,
@@ -93,8 +87,13 @@
     conic-gradient(from var(--cursor-angle) at center, transparent 5%, black 15%, black 85%, transparent 95%);
 
   mask-composite: subtract, add, add, add, add, add;
-  opacity: calc(var(--fill-opacity, 0.5) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+  mix-blend-mode: multiply;
+  opacity: calc(var(--fill-opacity, 0.2) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+}
+
+.dark .border-glow-card::after {
   mix-blend-mode: soft-light;
+  opacity: calc(var(--fill-opacity, 0.5) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
 }
 
 /* outer glow layer - tightly hugs the edge */
@@ -107,6 +106,11 @@
   mask-image:
     conic-gradient(from var(--cursor-angle) at center, black 2.5%, transparent 10%, transparent 90%, black 97.5%);
 
+  opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)) * 0.4);
+  mix-blend-mode: normal;
+}
+
+.dark .border-glow-card>.edge-light {
   opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
   mix-blend-mode: plus-lighter;
 }

@@ -11,9 +11,14 @@ import pandas as pd
 import numpy as np
 import pickle
 import os
+import sys
 from surprise import Dataset, Reader, SVD
 from surprise.model_selection import cross_validate
 from surprise import accuracy
+
+# Add backend to path for app imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app import create_app
 
 # Config
 DATA_PATH = os.path.join(os.path.dirname(__file__), "Reviews.csv")
@@ -26,6 +31,10 @@ print("=" * 55)
 
 # Step 1: Load & Clean Data
 print("\n📂 Loading dataset...")
+if not os.path.exists(DATA_PATH):
+    print(f"❌ ERROR: {DATA_PATH} not found. Please provide a Reviews.csv file to train SVD.")
+    sys.exit(1)
+
 df = pd.read_csv(DATA_PATH, usecols=["UserId", "ProductId", "Score"])
 print(f"   Raw rows     : {len(df):,}")
 

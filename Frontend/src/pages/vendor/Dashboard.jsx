@@ -16,8 +16,8 @@ export default function VendorDashboard() {
 
   useEffect(() => {
     Promise.all([
-      API.get('/products/my').catch(() => ({ data: { products: [] } })),
-      API.get('/orders/vendor').catch(() => ({ data: { orders: [] } })),
+      API.get('/vendor/products').catch(() => ({ data: { products: [] } })),
+      API.get('/vendor/orders').catch(() => ({ data: { orders: [] } })),
     ]).then(([pRes, oRes]) => {
       setProducts(pRes.data.products || []);
       setOrders(oRes.data.orders || []);

@@ -10,7 +10,7 @@ export default function MyProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetch = () => { API.get('/products/my').then(r => setProducts(r.data.products || [])).catch(() => {}).finally(() => setLoading(false)); };
+  const fetch = () => { API.get('/vendor/products').then(r => setProducts(r.data.products || [])).catch(() => {}).finally(() => setLoading(false)); };
   useEffect(fetch, []);
 
   const formatPrice = (p) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(p);

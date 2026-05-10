@@ -9,7 +9,7 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
     # Config
     # Use 'or' instead of default to handle empty strings "", and strip whitespace
@@ -19,7 +19,7 @@ def create_app():
     if db_url.startswith("mysql://"):
         db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
     
-    print(f"📡 Connecting to: {db_url.split('@')[-1]}") # Log host only for safety
+    print(f"Connecting to: {db_url.split('@')[-1]}") # Log host only for safety
     
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

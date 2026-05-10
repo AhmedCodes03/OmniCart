@@ -37,7 +37,7 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-xl sm:text-2xl text-surface-600 dark:text-surface-400 max-w-xl mb-14 leading-relaxed font-bold tracking-tight mx-auto lg:mx-0"
+              className="text-xl sm:text-2xl text-surface-700 dark:text-surface-300 max-w-xl mb-14 leading-relaxed font-bold tracking-tight mx-auto lg:mx-0"
             >
               Experience a seamless blend of high-end hardware and intuitive design. 
               Curated, authenticated, and delivered with precision.
@@ -143,7 +143,7 @@ function CategoryShowcase() {
           <h2 className="text-6xl sm:text-7xl font-black text-surface-950 dark:text-white mb-10 tracking-tighter leading-tight">
             Shop by <span className="text-surface-400">Category.</span>
           </h2>
-          <p className="text-surface-600 dark:text-surface-400 text-xl leading-relaxed max-w-2xl font-bold">
+          <p className="text-surface-700 dark:text-surface-300 text-xl leading-relaxed max-w-2xl font-bold">
             Explore our hand-picked selection of top-tier electronics, 
             backed by our quality assurance and authentication protocols.
           </p>
@@ -269,7 +269,7 @@ function FeaturesSection() {
           <h2 className="text-7xl sm:text-8xl font-black text-surface-950 dark:text-white mb-12 tracking-tighter leading-none">
             Simply <br /> <span className="text-surface-400">Premium.</span>
           </h2>
-          <p className="text-xl text-surface-600 dark:text-surface-400 leading-relaxed font-bold mb-16 max-w-2xl">
+          <p className="text-xl text-surface-700 dark:text-surface-300 leading-relaxed font-bold mb-16 max-w-2xl">
             OmniCart Studio is not a simple marketplace; it is a high-performance 
             ecosystem designed for the next generation of commerce.
           </p>
@@ -302,7 +302,7 @@ function FeaturesSection() {
                     <f.icon className={`w-8 h-8 ${f.color} floating`} />
                   </div>
                   <h3 className="font-black text-surface-950 dark:text-white text-2xl mb-4 tracking-tighter">{f.title}</h3>
-                  <p className="text-sm text-surface-600 dark:text-surface-400 leading-relaxed font-bold">{f.desc}</p>
+                  <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed font-bold">{f.desc}</p>
                 </div>
               </BorderGlow>
             </motion.div>

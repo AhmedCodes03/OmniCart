@@ -20,12 +20,12 @@ export default function ProductCard({ product, index = 0 }) {
   };
 
   const gradients = [
-    'from-primary-500/10 to-indigo-600/5',
-    'from-rose-500/10 to-pink-600/5',
-    'from-emerald-500/10 to-teal-600/5',
-    'from-amber-500/10 to-orange-600/5',
-    'from-cyan-500/10 to-blue-600/5',
-    'from-violet-500/10 to-fuchsia-600/5',
+    'from-primary-500/20 dark:from-primary-500/10 to-indigo-600/10 dark:to-indigo-600/5',
+    'from-rose-500/20 dark:from-rose-500/10 to-pink-600/10 dark:to-pink-600/5',
+    'from-emerald-500/20 dark:from-emerald-500/10 to-teal-600/10 dark:to-teal-600/5',
+    'from-amber-500/20 dark:from-amber-500/10 to-orange-600/10 dark:to-orange-600/5',
+    'from-cyan-500/20 dark:from-cyan-500/10 to-blue-600/10 dark:to-blue-600/5',
+    'from-violet-500/20 dark:from-violet-500/10 to-fuchsia-600/10 dark:to-fuchsia-600/5',
   ];
 
   return (
@@ -96,17 +96,17 @@ export default function ProductCard({ product, index = 0 }) {
               </h3>
             </Link>
             <div className="flex items-center gap-3">
-              <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.3em]">{product.brand || 'Studio Spec'}</span>
-              <div className="h-1 w-1 rounded-full bg-surface-200 dark:bg-white/20" />
+              <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">{product.brand || 'Studio Spec'}</span>
+              <div className="h-1 w-1 rounded-full bg-surface-300 dark:bg-white/20" />
               <div className="flex items-center gap-1.5">
-                 <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                 <span className="text-[8px] font-black text-surface-500 dark:text-surface-400 uppercase tracking-widest">Verified Unit</span>
+                 <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-500" />
+                 <span className="text-[8px] font-black text-surface-600 dark:text-surface-400 uppercase tracking-widest">Verified Unit</span>
               </div>
             </div>
           </div>
 
           {product.description && (
-            <p className="text-[11px] text-surface-600 dark:text-surface-400 font-bold line-clamp-2 mb-6 leading-relaxed uppercase tracking-widest">{product.description}</p>
+            <p className="text-[11px] text-surface-700 dark:text-surface-300 font-bold line-clamp-2 mb-6 leading-relaxed uppercase tracking-widest">{product.description}</p>
           )}
 
           <div className="mt-auto pt-6 border-t border-surface-100 dark:border-white/5">

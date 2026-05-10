@@ -14,7 +14,7 @@ export default function AddProduct() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    API.get('/products/categories')
+    API.get('/categories')
       .then(res => setCategories(res.data.categories))
       .catch(() => toast.error('Failed to load categories'));
   }, []);
@@ -39,7 +39,7 @@ export default function AddProduct() {
     if (!form.category_id) return toast.error('Please select a category');
     setLoading(true);
     try {
-      await API.post('/products/', { ...form, price: parseFloat(form.price), stock_qty: parseInt(form.stock_qty || 0), category_id: parseInt(form.category_id) });
+      await API.post('/vendor/products', { ...form, price: parseFloat(form.price), stock_qty: parseInt(form.stock_qty || 0), category_id: parseInt(form.category_id) });
       toast.success('Product created!');
       navigate('/vendor/products');
     } catch (err) { toast.error(err.response?.data?.error || 'Failed'); }

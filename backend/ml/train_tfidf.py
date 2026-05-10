@@ -17,10 +17,10 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from ..app import create_app
-from ..app.extensions import db
-from ..app.models.product import Product
-from ..app.models.category import Category
+from app import create_app
+from app.extensions import db
+from app.models.product import Product
+from app.models.category import Category
 
 # Config
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "tfidf_model.pkl")
