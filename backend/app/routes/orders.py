@@ -134,7 +134,14 @@ def place_order():
 def get_orders():
     customer_id = int(get_jwt_identity())
     orders = (Order.query.filter_by(customer_id=customer_id).order_by(Order.placed_at.desc()).all())
-    return jsonify({"orders": [o.to_dict() for o in orders]}), 200
+    
+    order_list = []
+    for o in orders:
+        d = o.to_dict()
+        d["items"] = [None] * len(o.order_items) # Provide items array (or just count) for frontend
+        order_list.append(d)
+        
+    return jsonify({"orders": order_list}), 200
 
 
 # ===================

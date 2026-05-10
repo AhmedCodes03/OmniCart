@@ -16,8 +16,8 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     Promise.all([
-      API.get('/orders/').catch(() => ({ data: { orders: [] } })),
-      API.get('/recommendations/').catch(() => ({ data: { recommendations: [] } })),
+      API.get('/orders').catch(() => ({ data: { orders: [] } })),
+      API.get('/recommendations').catch(() => ({ data: { recommendations: [] } })),
     ]).then(([oRes, rRes]) => {
       setOrders(oRes.data.orders || []);
       setRecommendations(rRes.data.recommendations || []);

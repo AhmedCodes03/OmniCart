@@ -10,7 +10,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    API.get('/orders/').then(res => setOrders(res.data.orders || [])).catch(() => {}).finally(() => setLoading(false));
+    API.get('/orders').then(res => setOrders(res.data.orders || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const formatPrice = (p) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(p);
