@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, User, Menu, X, Search, LogOut, LayoutDashboard, Package, ChevronDown, Sun, Moon, Globe, Cpu, Zap, Activity, ArrowRight } from 'lucide-react';
+import { User, Menu, X, Search, LogOut, LayoutDashboard, Package, ChevronDown, Sun, Moon, Globe, Cpu, Zap, Activity, ArrowRight } from 'lucide-react';
+import OmniCartIcon from '../common/OmniCartIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -81,9 +82,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo - Studio Command */}
             <Link to="/" className="flex items-center gap-4 group relative">
-              <div className="w-12 h-12 rounded-[18px] glass bg-primary-500/10 flex items-center justify-center border border-primary-500/30 group-hover:rotate-[15deg] transition-all duration-700 shadow-2xl shadow-primary-500/20">
-                <ShoppingCart className="w-6 h-6 text-primary-500 stroke-[2.5] floating" />
-              </div>
+              <OmniCartIcon className="w-12 h-12" />
               <div className="flex flex-col">
                 <span className="text-xl font-black text-surface-950 dark:text-white tracking-tighter leading-none">
                   OMNI<span className="gradient-text">CART</span>

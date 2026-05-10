@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Globe, Share2, Mail, Heart, Cpu, Zap, Activity, ShieldCheck } from 'lucide-react';
+import { Globe, Share2, Mail, Heart, Zap, Activity, ShieldCheck } from 'lucide-react';
+import OmniCartIcon from '../common/OmniCartIcon';
 
 export default function Footer() {
   return (
@@ -15,9 +16,7 @@ export default function Footer() {
           {/* Brand - Studio Info */}
           <div className="lg:col-span-1 space-y-8">
             <Link to="/" className="flex items-center gap-4 group">
-              <div className="w-12 h-12 rounded-2xl glass bg-primary-500/10 flex items-center justify-center border border-primary-500/20 group-hover:rotate-12 transition-all duration-700">
-                <Cpu className="w-6 h-6 text-primary-500 floating" />
-              </div>
+              <OmniCartIcon className="w-12 h-12" />
               <div className="flex flex-col">
                 <span className="text-xl font-black text-surface-950 dark:text-white tracking-tighter leading-none">
                   OMNI<span className="gradient-text">CART</span>

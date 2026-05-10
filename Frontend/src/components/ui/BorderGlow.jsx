@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react';
 import './BorderGlow.css';
-import { TruckElectric } from 'lucide-react';
+
+
 
 function parseHSL(hslStr) {
   const match = hslStr.match(/([\d.]+)\s*([\d.]+)%?\s*([\d.]+)%?/);
