@@ -2,11 +2,14 @@ import pickle
 import os
 import numpy as np
 
-# Correct path: backend/ml/
-ML_DIR = os.path.join(os.path.dirname(__file__), "..", "ml")
+# Path logic: app/services -> app -> root -> ml
+ML_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "ml")
 SVD_PATH = os.path.join(ML_DIR, "svd_model.pkl")
 TFIDF_PATH = os.path.join(ML_DIR, "tfidf_model.pkl")
 SENTIMENT_PATH = os.path.join(ML_DIR, "sentiment_model.pkl")
+
+# Debug path log (will show in Railway logs)
+print(f"🤖 ML Models Directory: {os.path.abspath(ML_DIR)}")
 
 _svd_model = None
 _tfidf_data = None
