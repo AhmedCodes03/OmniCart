@@ -2,6 +2,9 @@ venv/
 __pycache__/
 *.pyc
 .env
+# Ignore pickle files by default
 *.pkl
+# But allow the production models
+!backend/ml/*.pkl
 node_modules/
 ml/Reviews.csv
