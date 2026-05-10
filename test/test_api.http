@@ -1,0 +1,491 @@
+# OmniCart API Test Suite
+# VS Code REST Client (.http file)
+# ─────────────────────────────────────────────
+# SETUP:
+# 1. Install the "REST Client" extension by Huachao Mao
+# 2. Run the login requests first
+# 3. Copy the returned token into the matching @token variable below
+# 4. Click "Send Request" above any request to fire it
+# ─────────────────────────────────────────────
+
+@baseUrl = http://localhost:5000/api
+
+# ── PASTE TOKENS HERE AFTER LOGGING IN ──────
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3ODI0MTA0OSwianRpIjoiNWVkYTY1MzctNGMxNS00ZDNlLWJjMDAtNmRmMTQ3OWFkODk5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzgyNDEwNDksImNzcmYiOiJmNDBlYTBlNi03MDE3LTQ2ZDEtYjkyYy1mMDcxYmJlNDY4MzAiLCJleHAiOjE3NzgyNDE5NDksInJvbGUiOiJjdXN0b21lciIsIm5hbWUiOiJSYXl5YW4gQWFtaXIifQ.sOgXAvSC845-Zn-euYYqe26uAVMgYNenX5HYZOWclP0
+@vendorToken   = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3ODI0MDE0MiwianRpIjoiMzFiZGY5OGItYjRiOS00MzY4LTkwMGEtNzgzYTI2ZjhjNDgyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzgyNDAxNDIsImNzcmYiOiI1YzM5ZDFkMi1jYTk3LTQzMWQtYmYzMy05YmI5MWQ0YTY5N2IiLCJleHAiOjE3NzgyNDEwNDIsInJvbGUiOiJ2ZW5kb3IiLCJuYW1lIjoiQWxpIFJhemEifQ.vAeIU8k1BuKcseRMAASfJonSlwcjdK2bTbUBpjIP-E8
+@adminToken    = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3ODIzOTc4NSwianRpIjoiNThiOWIyN2MtMzQzYi00ZDllLTg4YTktZmYxYzVlMzRkNjEzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzgyMzk3ODUsImNzcmYiOiJiMmFkOGU1Yi1iNzA4LTQ5OWEtYTYzZC1hNTY3OGIxMmMzNzAiLCJleHAiOjE3NzgyNDA2ODUsInJvbGUiOiJhZG1pbiIsIm5hbWUiOiJTdXBlciBBZG1pbiJ9.smgvgO9ciDDk6iydqknBVKhaWHafILjx6z4Fny8HTVU
+
+# ══════════════════════════════════════════════════
+# AUTH
+# ══════════════════════════════════════════════════
+
+### Login Admin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@omnicart.com",
+  "password": "SuperAdmin@1234",
+  "role": "admin"
+}
+
+###
+
+### Login Customer
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "rayyan.aamir@gmail.com",
+  "password": "Customer@1234",
+  "role": "customer"
+}
+
+###
+
+### Login Vendor
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "techzone@omnicart.com",
+  "password": "Vendor@1234",
+  "role": "vendor"
+}
+
+###
+
+### Register Customer
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User1",
+  "email": "test.user1@gmail.com",
+  "password": "Test@1234",
+  "role": "customer",
+  "phone": "0311-9999999",
+  "address": "Test House, Karachi"
+}
+
+###
+
+### Register Vendor
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test Vendor",
+  "email": "test.vendor@gmail.com",
+  "password": "Test@1234",
+  "role": "vendor",
+  "store_name": "Test Store"
+}
+
+###
+
+### Get Current User (me)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Update Profile
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "name": "Rayyan Updated",
+  "phone": "0311-1111112"
+}
+
+###
+
+### Change Password
+PUT {{baseUrl}}/auth/change-password
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "old_password": "Customer@1234",
+  "new_password": "NewPass@1234"
+}
+
+###
+
+
+# ══════════════════════════════════════════════════
+# PRODUCTS
+# ══════════════════════════════════════════════════
+
+### List All Products
+GET {{baseUrl}}/products
+
+###
+
+### Search Products (keyword)
+GET {{baseUrl}}/products?q=sony&sort_by=price&order=asc
+
+###
+
+### Filter by Category + Price Range
+GET {{baseUrl}}/products?category_id=2&min_price=10000&max_price=100000
+
+###
+
+### Product Detail
+GET {{baseUrl}}/products/1
+
+###
+
+### List Categories
+GET {{baseUrl}}/categories
+
+###
+
+
+# ══════════════════════════════════════════════════
+# CART
+# ══════════════════════════════════════════════════
+
+### Add to Cart wowza
+POST {{baseUrl}}/cart
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "product_id": 3,
+  "quantity": 2
+}
+
+###
+
+### View Cart # wowza
+GET {{baseUrl}}/cart
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Remove Cart Item (replace 1 with real cart_id)
+DELETE {{baseUrl}}/cart/1
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Clear Cart
+DELETE {{baseUrl}}/cart
+Authorization: Bearer {{customerToken}}
+
+###
+
+
+# ══════════════════════════════════════════════════
+# ORDERS
+# ══════════════════════════════════════════════════
+
+### Place Order
+POST {{baseUrl}}/orders
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "cart_items": [
+    {"product_id": 5, "quantity": 1},
+    {"product_id": 16, "quantity": 2}
+  ]
+}
+
+###
+
+### Order History
+GET {{baseUrl}}/orders
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Order Detail (replace 1 with real order_id)
+GET {{baseUrl}}/orders/1
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Cancel Order (replace 1 with real order_id) wowza
+POST {{baseUrl}}/orders/1/cancel
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Process Payment wowza
+POST {{baseUrl}}/payments
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "order_id": 1,
+  "method": "credit_card",
+  "amount": 14999.00
+}
+
+###
+
+### Get Payment for Order
+GET {{baseUrl}}/payments/1
+Authorization: Bearer {{customerToken}}
+
+###
+
+
+# ══════════════════════════════════════════════════
+# REVIEWS
+# ══════════════════════════════════════════════════
+
+### Submit Review
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "product_id": 5,
+  "rating": 5,
+  "comment": "Absolutely fantastic product. Worth every rupee!"
+}
+
+###
+
+### My Reviews
+GET {{baseUrl}}/reviews/my
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Edit Review (replace 1 with real review_id)
+PUT {{baseUrl}}/reviews/1
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "comment": "Updated: still great but battery life could be better."
+}
+
+###
+
+### Delete Review - Customer (own review)
+DELETE {{baseUrl}}/reviews/1
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Delete Review - Admin (any review)
+DELETE {{baseUrl}}/reviews/1
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Product Reviews
+GET {{baseUrl}}/products/1/reviews
+
+###
+
+
+# ══════════════════════════════════════════════════
+# SELLER
+# ══════════════════════════════════════════════════
+
+### Add Product
+POST {{baseUrl}}/vendor/products
+Authorization: Bearer {{vendorToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Wireless Earbuds",
+  "category_id": 2,
+  "price": 7999.00,
+  "stock_qty": 50,
+  "brand": "TestBrand",
+  "description": "High quality wireless earbuds with ANC"
+}
+
+###
+
+### List My Products
+GET {{baseUrl}}/vendor/products
+Authorization: Bearer {{vendorToken}}
+
+###
+
+### Update Product (replace 1 with real product_id)
+PUT {{baseUrl}}/vendor/products/1
+Authorization: Bearer {{vendorToken}}
+Content-Type: application/json
+
+{
+  "stock_qty": 25,
+  "price": 47999.00
+}
+
+###
+
+### Deactivate Product (replace 1 with real product_id)
+DELETE {{baseUrl}}/vendor/products/1
+Authorization: Bearer {{vendorToken}}
+
+###
+
+### Seller Orders
+GET {{baseUrl}}/vendor/orders
+Authorization: Bearer {{vendorToken}}
+
+###
+
+### Seller Stats
+GET {{baseUrl}}/vendor/stats
+Authorization: Bearer {{vendorToken}}
+
+###
+
+
+# ══════════════════════════════════════════════════
+# ADMIN
+# ══════════════════════════════════════════════════
+
+### List All Users
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{adminToken}}
+
+###
+
+### List Customers Only
+GET {{baseUrl}}/admin/users?type=customer
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Deactivate Customer
+POST {{baseUrl}}/admin/deactivate
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "user_id": 10,
+  "user_type": "customer",
+  "reason": "Violation of terms of service"
+}
+
+###
+
+### Deactivate Vendor
+POST {{baseUrl}}/admin/deactivate
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "user_id": 5,
+  "user_type": "vendor",
+  "reason": "Fraudulent listings"
+}
+
+###
+
+### Platform Stats
+GET {{baseUrl}}/admin/stats
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Pending Vendors
+GET {{baseUrl}}/admin/vendors/pending
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Approve Vendor (replace 1 with real vendor_id)
+POST {{baseUrl}}/admin/vendors/1/approve
+Authorization: Bearer {{adminToken}}
+
+###
+
+### All Products (admin view)
+GET {{baseUrl}}/admin/products
+Authorization: Bearer {{adminToken}}
+
+###
+
+### List Categories
+GET {{baseUrl}}/admin/categories
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Add Category
+POST {{baseUrl}}/admin/categories
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Wearables",
+  "description": "Smartwatches and fitness trackers",
+  "parent_category_id": 1
+}
+
+###
+
+### Delete Category (replace 1 with real category_id)
+DELETE {{baseUrl}}/admin/categories/1
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Low Stock Products
+GET {{baseUrl}}/admin/low-stock
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Abandoned Carts
+GET {{baseUrl}}/admin/abandoned-carts
+Authorization: Bearer {{adminToken}}
+
+###
+
+### All Customers (n8n digest)
+GET {{baseUrl}}/admin/all-customers
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+# ══════════════════════════════════════════════════
+# COMPLEX QUERIES
+# ══════════════════════════════════════════════════
+
+### Q1: Customer Order History (JOIN)
+GET {{baseUrl}}/queries/order-history
+Authorization: Bearer {{customerToken}}
+
+###
+
+### Q2: Monthly Revenue Report (GROUP BY + DATE_FORMAT)
+GET {{baseUrl}}/queries/monthly-revenue
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Q3: Top Customers by Spend (HAVING + subquery)
+GET {{baseUrl}}/queries/top-customers?min_orders=1
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Q4: Vendor Sales Performance (multi-JOIN + COALESCE)
+GET {{baseUrl}}/queries/vendor-performance
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Q5: Category Sentiment Analysis (subquery + AVG)
+GET {{baseUrl}}/queries/category-sentiment
+Authorization: Bearer {{adminToken}}
+
+###
