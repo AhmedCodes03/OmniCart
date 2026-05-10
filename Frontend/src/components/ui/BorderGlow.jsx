@@ -1,5 +1,6 @@
 import { useRef, useCallback, useEffect } from 'react';
 import './BorderGlow.css';
+import { TruckElectric } from 'lucide-react';
 
 function parseHSL(hslStr) {
   const match = hslStr.match(/([\d.]+)\s*([\d.]+)%?\s*([\d.]+)%?/);
@@ -51,16 +52,16 @@ function animateValue({ start = 0, end = 100, duration = 1000, delay = 0, ease =
 const BorderGlow = ({
   children,
   className = '',
-  edgeSensitivity = 30,
-  glowColor = '40 80 80',
-  backgroundColor = '#120F17',
-  borderRadius = 28,
-  glowRadius = 40,
-  glowIntensity = 1.0,
-  coneSpread = 25,
-  animated = false,
+  edgeSensitivity = 20,
+  glowColor = '268 100 76',
+  backgroundColor = 'var(--card-bg, rgba(255, 255, 255, 0.05))',
+  borderRadius = 35,
+  glowRadius = 20,
+  glowIntensity = 1,
+  coneSpread = 5,
+  animated = true,
   colors = ['#c084fc', '#f472b6', '#38bdf8'],
-  fillOpacity = 0.5,
+  fillOpacity = 0.1,
 }) => {
   const cardRef = useRef(null);
 
@@ -115,13 +116,18 @@ const BorderGlow = ({
     card.style.setProperty('--cursor-angle', `${angleStart}deg`);
 
     animateValue({ duration: 500, onUpdate: v => card.style.setProperty('--edge-proximity', v) });
-    animateValue({ ease: easeInCubic, duration: 1500, end: 50, onUpdate: v => {
-      card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
-    }});
-    animateValue({ ease: easeOutCubic, delay: 1500, duration: 2250, start: 50, end: 100, onUpdate: v => {
-      card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
-    }});
-    animateValue({ ease: easeInCubic, delay: 2500, duration: 1500, start: 100, end: 0,
+    animateValue({
+      ease: easeInCubic, duration: 1500, end: 50, onUpdate: v => {
+        card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
+      }
+    });
+    animateValue({
+      ease: easeOutCubic, delay: 1500, duration: 2250, start: 50, end: 100, onUpdate: v => {
+        card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
+      }
+    });
+    animateValue({
+      ease: easeInCubic, delay: 2500, duration: 1500, start: 100, end: 0,
       onUpdate: v => card.style.setProperty('--edge-proximity', v),
       onEnd: () => card.classList.remove('sweep-active'),
     });
@@ -146,7 +152,7 @@ const BorderGlow = ({
       }}
     >
       <span className="edge-light" />
-      <div className="border-glow-inner">
+      <div className="border-glow-inner h-full">
         {children}
       </div>
     </div>
