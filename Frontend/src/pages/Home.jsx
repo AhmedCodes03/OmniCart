@@ -26,7 +26,7 @@ function Hero() {
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-7xl sm:text-8xl lg:text-[9rem] font-black leading-[0.85] mb-10 tracking-tighter text-surface-950 dark:text-white"
+              className="text-7xl sm:text-8xl lg:text-[9rem] font-black leading-[0.85] mb-10 tracking-tighter text-surface-900 dark:text-white"
             >
               The Next <br />
               <span className="text-surface-400">Generation.</span> <br />
@@ -37,7 +37,7 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-xl sm:text-2xl text-surface-700 dark:text-surface-300 max-w-xl mb-14 leading-relaxed font-bold tracking-tight mx-auto lg:mx-0"
+              className="text-xl sm:text-2xl text-surface-500 dark:text-surface-300 max-w-xl mb-14 leading-relaxed font-bold tracking-tight mx-auto lg:mx-0"
             >
               Experience a seamless blend of high-end hardware and intuitive design. 
               Curated, authenticated, and delivered with precision.
@@ -52,7 +52,7 @@ function Hero() {
               <Link to="/products" className="btn-primary !px-14 !py-7 !rounded-3xl text-lg shadow-2xl shadow-primary-500/30 floating">
                 Shop Collection
               </Link>
-              <Link to="/register" className="group flex items-center gap-4 text-surface-950 dark:text-white font-black uppercase tracking-[0.4em] text-[10px] hover:text-primary-500 transition-all">
+              <Link to="/register" className="group flex items-center gap-4 text-surface-900 dark:text-white font-black uppercase tracking-[0.4em] text-[10px] hover:text-primary-500 transition-all">
                 Become a Seller <ArrowRight className="w-5 h-5 group-hover:translate-x-3 transition-transform" />
               </Link>
             </motion.div>
@@ -140,10 +140,10 @@ function CategoryShowcase() {
           className="max-w-3xl"
         >
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary-500 mb-8 block">Product Categories</span>
-          <h2 className="text-6xl sm:text-7xl font-black text-surface-950 dark:text-white mb-10 tracking-tighter leading-tight">
+          <h2 className="text-6xl sm:text-7xl font-black text-surface-900 dark:text-white mb-10 tracking-tighter leading-tight">
             Shop by <span className="text-surface-400">Category.</span>
           </h2>
-          <p className="text-surface-700 dark:text-surface-300 text-xl leading-relaxed max-w-2xl font-bold">
+          <p className="text-surface-500 dark:text-surface-300 text-xl leading-relaxed max-w-2xl font-bold">
             Explore our hand-picked selection of top-tier electronics, 
             backed by our quality assurance and authentication protocols.
           </p>
@@ -167,7 +167,7 @@ function CategoryShowcase() {
                 <div className={`w-24 h-24 mb-12 rounded-[32px] ${cat.bg} flex items-center justify-center transition-all duration-700 group-hover:scale-110 group-hover:rotate-12 shadow-2xl`}>
                   <cat.icon className={`w-10 h-10 ${cat.color} stroke-[2.5]`} />
                 </div>
-                <h3 className="font-black text-surface-950 dark:text-white text-3xl mb-4 tracking-tighter">{cat.name}</h3>
+                <h3 className="font-black text-surface-900 dark:text-white text-3xl mb-4 tracking-tighter">{cat.name}</h3>
                 <p className="text-surface-400 font-black text-[10px] uppercase tracking-[0.3em]">{cat.desc}</p>
                 
                 <div className="absolute top-10 right-10 w-12 h-12 rounded-2xl glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
@@ -210,7 +210,7 @@ function TrendingProducts() {
           viewport={{ once: true }}
         >
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-rose-500 mb-8 block">Trending Now</span>
-          <h2 className="text-6xl sm:text-7xl font-black text-surface-950 dark:text-white tracking-tighter">
+          <h2 className="text-6xl sm:text-7xl font-black text-surface-900 dark:text-white tracking-tighter">
             Most <span className="gradient-text">Popular.</span>
           </h2>
         </motion.div>
@@ -266,21 +266,21 @@ function FeaturesSection() {
           viewport={{ once: true }}
         >
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary-500 mb-8 block">Why Choose Us</span>
-          <h2 className="text-7xl sm:text-8xl font-black text-surface-950 dark:text-white mb-12 tracking-tighter leading-none">
+          <h2 className="text-7xl sm:text-8xl font-black text-surface-900 dark:text-white mb-12 tracking-tighter leading-none">
             Simply <br /> <span className="text-surface-400">Premium.</span>
           </h2>
-          <p className="text-xl text-surface-700 dark:text-surface-300 leading-relaxed font-bold mb-16 max-w-2xl">
+          <p className="text-xl text-surface-500 dark:text-surface-300 leading-relaxed font-bold mb-16 max-w-2xl">
             OmniCart Studio is not a simple marketplace; it is a high-performance 
             ecosystem designed for the next generation of commerce.
           </p>
           <div className="flex items-center gap-16">
             <div>
-              <p className="text-6xl font-black text-surface-950 dark:text-white tracking-tighter">99.9<span className="text-primary-500">%</span></p>
+              <p className="text-6xl font-black text-surface-900 dark:text-white tracking-tighter">99.9<span className="text-primary-500">%</span></p>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-surface-400 mt-4">Uptime Protocol</p>
             </div>
             <div className="h-16 w-px bg-surface-200 dark:bg-white/10" />
             <div>
-              <p className="text-6xl font-black text-surface-950 dark:text-white tracking-tighter">20<span className="text-primary-500">ms</span></p>
+              <p className="text-6xl font-black text-surface-900 dark:text-white tracking-tighter">20<span className="text-primary-500">ms</span></p>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-surface-400 mt-4">Latency Index</p>
             </div>
           </div>
@@ -301,8 +301,8 @@ function FeaturesSection() {
                   <div className="w-16 h-16 mb-10 rounded-[20px] glass flex items-center justify-center shadow-xl">
                     <f.icon className={`w-8 h-8 ${f.color} floating`} />
                   </div>
-                  <h3 className="font-black text-surface-950 dark:text-white text-2xl mb-4 tracking-tighter">{f.title}</h3>
-                  <p className="text-sm text-surface-700 dark:text-surface-300 leading-relaxed font-bold">{f.desc}</p>
+                  <h3 className="font-black text-surface-900 dark:text-white text-2xl mb-4 tracking-tighter">{f.title}</h3>
+                  <p className="text-sm text-surface-500 dark:text-surface-300 leading-relaxed font-bold">{f.desc}</p>
                 </div>
               </BorderGlow>
             </motion.div>
@@ -335,14 +335,14 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-b from-primary-500/10 to-transparent pointer-events-none" />
                 <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[140px] floating" />
                 
-                <h2 className="text-7xl sm:text-[9rem] font-black text-surface-950 dark:text-white mb-16 tracking-tighter leading-[0.85] relative z-10">
+                <h2 className="text-7xl sm:text-[9rem] font-black text-surface-900 dark:text-white mb-16 tracking-tighter leading-[0.85] relative z-10">
                   Start <br /> <span className="gradient-text">Selling.</span>
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-10 relative z-10">
                   <Link to="/register" className="btn-primary !px-16 !py-8 !rounded-3xl shadow-2xl shadow-primary-500/30 floating">
                     Create Seller Account
                   </Link>
-                  <Link to="/login" className="text-surface-950 dark:text-white font-black uppercase tracking-[0.5em] text-[11px] hover:text-primary-500 transition-all">
+                  <Link to="/login" className="text-surface-900 dark:text-white font-black uppercase tracking-[0.5em] text-[11px] hover:text-primary-500 transition-all">
                     Sign In to Your Hub
                   </Link>
                 </div>
