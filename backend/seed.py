@@ -16,9 +16,9 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from datetime import datetime, timedelta, date
-from backend.app import create_app
-from backend.app.extensions import db, bcrypt
-from backend.app.models import (
+from app import create_app
+from app.extensions import db, bcrypt
+from app.models import (
     Admin, Customer, Vendor, Category, Product,
     Order, OrderItem, Payment, Review, Cart, Recommendation
 )
