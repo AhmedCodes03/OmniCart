@@ -12,9 +12,7 @@ def create_app():
     CORS(app)
 
     # Config
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"mysql+pymysql://root:omnicart@localhost/omnicart_db"
-    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "mysql+pymysql://root:omnicart@localhost/omnicart_db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallback-dev-secret")
 
