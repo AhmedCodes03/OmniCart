@@ -32,8 +32,11 @@ def clean_str(value):
 def extract_sp_error(exception) -> str:
     """
     Pull the human-readable message out of a MySQL SIGNAL / SQLSTATE 45000
-    exception string. Falls back to a generic message if parsing fails.
+    exception string.  The pymysql error looks like:
+        (1644, 'Invalid customer!')
+    so we extract the single-quoted message after the error code.
+    Falls back to a generic message if parsing fails.
     """
     msg = str(exception)
-    match = re.search(r'"(.+?)"', msg)
+    match = re.search(r"\(1644,\s*[\"'](.+?)[\"']\)", msg)
     return match.group(1) if match else None

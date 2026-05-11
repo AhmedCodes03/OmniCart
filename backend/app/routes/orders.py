@@ -85,7 +85,7 @@ def place_order():
 
         # Fire n8n webhook (non-blocking - failures never break order)
         try:
-            webhook_url = os.getenv("N8N_WEBHOOK_URL")
+            webhook_url = os.getenv("N8N_ORDER_PLACED_URL")
             if webhook_url:
                 order_obj = Order.query.get(order_id)
                 if order_obj:

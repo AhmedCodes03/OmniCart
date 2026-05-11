@@ -35,12 +35,13 @@ export default function Checkout() {
       let mappedMethod = method;
       if (method === 'cash') mappedMethod = 'cash_on_delivery';
       else if (method === 'card') mappedMethod = 'credit_card';
+      else if (method === 'bank') mappedMethod = 'bank_transfer';
 
       // Process payment
-      await API.post('/payments', { 
-        order_id: newOrderId, 
-        method: mappedMethod, 
-        amount: cartTotal 
+      await API.post('/payments', {
+        order_id: newOrderId,
+        method: mappedMethod,
+        amount: cartTotal
       });
 
       setOrderId(newOrderId);
@@ -64,7 +65,7 @@ export default function Checkout() {
           Order ID: <span className="text-primary-500">#{orderId}</span>. <br />
           Your products are being processed for delivery.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row justify-center gap-8">
           <button onClick={() => navigate('/dashboard/orders')} className="btn-primary !px-12 !py-5 !rounded-3xl flex items-center justify-center gap-4 shadow-2xl floating">
             Monitor Shipment <Package className="w-5 h-5 stroke-[2.5]" />
@@ -80,7 +81,7 @@ export default function Checkout() {
   return (
     <div className="section-padding py-24 sm:py-32 relative">
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary-500/5 rounded-full blur-[140px] pointer-events-none" />
-      
+
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-4 mb-6">
           <div className="w-10 h-10 rounded-2xl glass flex items-center justify-center text-primary-500">
@@ -89,7 +90,7 @@ export default function Checkout() {
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary-500 block">Complete Order</span>
         </div>
         <h1 className="text-6xl sm:text-8xl font-black text-surface-950 dark:text-white mb-20 tracking-tighter leading-tight">Secure <span className="text-surface-400">Checkout.</span></h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-20">
           <div className="lg:col-span-2 space-y-16">
             {/* Allocation Summary */}
@@ -122,11 +123,10 @@ export default function Checkout() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                   {methods.map((m) => (
                     <button key={m.value} onClick={() => setMethod(m.value)}
-                      className={`flex flex-col items-center gap-6 p-10 rounded-[40px] border transition-all duration-700 relative overflow-hidden group ${
-                        method === m.value 
-                        ? 'glass bg-primary-500/10 border-primary-500/50 text-primary-600 dark:text-primary-400 shadow-2xl' 
+                      className={`flex flex-col items-center gap-6 p-10 rounded-[40px] border transition-all duration-700 relative overflow-hidden group ${method === m.value
+                        ? 'glass bg-primary-500/10 border-primary-500/50 text-primary-600 dark:text-primary-400 shadow-2xl'
                         : 'border-surface-100 dark:border-white/5 text-surface-400 hover:bg-surface-50 dark:hover:bg-white/[0.05]'
-                      }`}>
+                        }`}>
                       <div className={`w-16 h-16 rounded-2xl glass flex items-center justify-center transition-all duration-700 ${method === m.value ? 'scale-110 rotate-12 shadow-xl' : 'group-hover:scale-110'}`}>
                         <m.icon className={`w-8 h-8 ${method === m.value ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
                       </div>
@@ -146,11 +146,11 @@ export default function Checkout() {
             <BorderGlow className="h-fit sticky top-32" borderRadius={50} glowRadius={10} animated={true}>
               <div className="p-12 h-fit overflow-hidden relative">
                 <div className="absolute bottom-0 left-0 w-40 h-40 bg-primary-500/10 rounded-full blur-[100px] -ml-20 -mb-20 pointer-events-none" />
-                
+
                 <h3 className="text-2xl font-black text-surface-950 dark:text-white mb-12 tracking-tighter flex items-center gap-4 relative z-10">
                   <Globe className="w-6 h-6 text-primary-500" /> Summary.
                 </h3>
-                
+
                 <div className="space-y-6 mb-16 relative z-10">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-surface-600 dark:text-surface-400">Total Items</span>
@@ -166,7 +166,7 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <button onClick={handlePlaceOrder} disabled={loading || cart.length === 0} 
+                <button onClick={handlePlaceOrder} disabled={loading || cart.length === 0}
                   className="btn-primary w-full !py-6 !rounded-[24px] flex items-center justify-center gap-5 shadow-2xl shadow-primary-500/30 group relative z-10 floating">
                   {loading ? (
                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -177,7 +177,7 @@ export default function Checkout() {
                     </>
                   )}
                 </button>
-                
+
                 <div className="mt-10 pt-8 border-t border-surface-100 dark:border-white/10 text-center relative z-10">
                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-surface-600 dark:text-surface-400 flex items-center justify-center gap-2">
                     <Zap className="w-3 h-3 text-amber-500" /> Secure Payment Active
