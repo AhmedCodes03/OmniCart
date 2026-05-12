@@ -112,9 +112,42 @@ def deactivate_user():
         return jsonify({"error": sp_msg or "Deactivation failed"}), 400
 
 
-# =======================
-# PLATFORM STATS
-# =======================
+@admin_bp.route("/reactivate", methods=["POST"])
+@jwt_required()
+@role_required("admin")
+def reactivate_user():
+    admin_id = int(get_jwt_identity())
+    data = request.get_json() or {}
+
+    user_id = data.get("user_id")
+    user_type = data.get("user_type")
+
+    if not user_id or not user_type:
+        return jsonify({"error": "'user_id' and 'user_type' are required"}), 400
+
+    try:
+        result = db.session.execute(
+            text("CALL ReactivateUser(:admin_id, :user_id, :user_type)"),
+            {"admin_id": admin_id, "user_id": user_id, "user_type": user_type},
+        )
+        row = result.fetchone()
+        db.session.commit()
+        return jsonify({"message": row[0] if row else "Reactivated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Reactivation failed", "detail": str(e)}), 400
+
+
+# ====================
+# VENDOR MANAGEMENT
+# ====================
+@admin_bp.route("/vendors", methods=["GET"])
+@jwt_required()
+@role_required("admin")
+def list_vendors():
+    """Returns all vendors for comprehensive management."""
+    vendors = Vendor.query.order_by(Vendor.is_approved.asc(), Vendor.created_at.desc()).all()
+    return jsonify({"vendors": [v.to_dict() for v in vendors], "count": len(vendors)}), 200
 @admin_bp.route("/stats", methods=["GET"])
 @jwt_required()
 @role_required("admin")
@@ -180,8 +213,8 @@ def platform_stats():
     total_products = Product.query.filter_by(is_active=True).count()
 
     return jsonify({
-        "total_orders": int(totals.total_orders),
-        "total_revenue": round(float(totals.total_revenue), 2),
+        "total_orders": int(totals.total_orders or 0),
+        "total_revenue": round(float(totals.total_revenue or 0), 2),
         "total_customers": total_customers,
         "total_vendors": total_vendors,
         "total_products": total_products,
@@ -245,6 +278,22 @@ def approve_vendor(vendor_id):
     return jsonify({
         "message": f"Vendor '{vendor.store_name}' approved successfully",
         "vendor":  vendor.to_dict(),
+    }), 200
+
+
+@admin_bp.route("/vendors/<int:vendor_id>/disapprove", methods=["POST"])
+@jwt_required()
+@role_required("admin")
+def disapprove_vendor(vendor_id):
+    vendor = Vendor.query.get(vendor_id)
+    if not vendor:
+        return jsonify({"error": "Vendor not found"}), 404
+
+    vendor.is_approved = False
+    db.session.commit()
+    return jsonify({
+        "message": f"Vendor '{vendor.store_name}' status revoked",
+        "vendor": vendor.to_dict(),
     }), 200
 
 

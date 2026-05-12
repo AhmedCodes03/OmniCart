@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     Promise.all([
       API.get('/admin/stats'),
       API.get('/admin/users?type=customer'),
-      API.get('/admin/vendors/pending'),
+      API.get('/admin/vendors'), // Changed from /pending
       API.get('/admin/products'),
       API.get('/admin/categories'),
     ])
@@ -42,49 +42,49 @@ export default function AdminDashboard() {
 
   const formatPrice = (p) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(p);
 
-  const toggleCustomer = async (id) => {
+  const toggleCustomer = async (customer) => {
+    const isDeactivating = customer.is_active;
+    const endpoint = isDeactivating ? '/admin/deactivate' : '/admin/reactivate';
+    
     try {
-      const res = await API.post('/admin/deactivate', {
-        user_id: Number(id),
+      const res = await API.post(endpoint, {
+        user_id: customer.customer_id,
         user_type: 'customer',
-        reason: 'Deactivated by admin',
+        reason: isDeactivating ? 'Administrative restriction' : 'Restored access',
       });
 
       setCustomers(cs =>
         cs.map(c =>
-          c.customer_id === id
-            ? { ...c, is_active: false }
+          c.customer_id === customer.customer_id
+            ? { ...c, is_active: !isDeactivating }
             : c
         )
       );
 
       toast.success(res.data.message);
     } catch (err) {
-      console.error(err.response?.data || err);
-
-      toast.error(
-        err.response?.data?.error ||
-        'Customer deactivation failed'
-      );
+      toast.error(err.response?.data?.error || 'Status toggle failed');
     }
   };
 
-  const toggleVendor = async (id) => {
+  const toggleVendor = async (vendor) => {
+    const isRevoking = vendor.is_approved;
+    const endpoint = `/admin/vendors/${vendor.vendor_id}/${isRevoking ? 'disapprove' : 'approve'}`;
+    
     try {
-      const res = await API.post(`/admin/vendors/${id}/approve`);
+      const res = await API.post(endpoint);
 
       setVendors(vs =>
-        vs.filter(v => v.vendor_id !== id)
+        vs.map(v =>
+          v.vendor_id === vendor.vendor_id
+            ? { ...v, is_approved: !isRevoking }
+            : v
+        )
       );
 
       toast.success(res.data.message);
     } catch (err) {
-      console.error(err.response?.data || err);
-
-      toast.error(
-        err.response?.data?.error ||
-        'Vendor approval failed'
-      );
+      toast.error(err.response?.data?.error || 'Vendor status change failed');
     }
   };
 
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-8 px-10 text-right">
                         <button
-                          onClick={() => tab === 'customers' ? toggleCustomer(item.customer_id) : toggleVendor(item.vendor_id)}
+                          onClick={() => tab === 'customers' ? toggleCustomer(item) : toggleVendor(item)}
                           className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${(tab === 'customers' ? item.is_active : item.is_approved)
                             ? 'text-red-500 bg-red-500/10 border-red-500/20 hover:bg-red-500 hover:text-white'
                             : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500 hover:text-white'
