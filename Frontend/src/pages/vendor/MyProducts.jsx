@@ -72,7 +72,7 @@ export default function MyProducts() {
                         </div>
                       </td>
                       <td className="py-8 px-10 text-sm font-black text-surface-500 uppercase tracking-widest hidden sm:table-cell">{p.brand}</td>
-                      <td className="py-8 px-10 font-black text-surface-950 dark:text-white tracking-tighter text-xl">{formatPrice(p.price)}</td>
+                      <td className="py-8 px-10 font-black text-surface-950 dark:text-white tracking-tighter text-xl">{formatPrice(parseFloat(p.price))}</td>
                       <td className="py-8 px-10 hidden md:table-cell">
                         <div className="flex items-center gap-3">
                           <span className={`text-sm font-black tracking-tighter ${p.stock_qty < 10 ? 'text-amber-500' : 'text-surface-950 dark:text-white'}`}>{p.stock_qty}</span>

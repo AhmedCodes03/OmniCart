@@ -324,8 +324,10 @@ def vendor_stats():
         {
             "product_id": r.product_id,
             "name": r.name,
+            "price": float(r.price),
             "stock_qty": r.stock_qty,
             "is_active": r.is_active,
+            "brand": r.brand,
             "units_sold": int(r.units_sold),
             "revenue": round(float(r.revenue), 2),
         }
