@@ -11,6 +11,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('overview');
 
@@ -19,11 +21,15 @@ export default function AdminDashboard() {
       API.get('/admin/stats'),
       API.get('/admin/users?type=customer'),
       API.get('/admin/vendors/pending'),
+      API.get('/admin/products'),
+      API.get('/admin/categories'),
     ])
-      .then(([sRes, cRes, vRes]) => {
+      .then(([sRes, cRes, vRes, pRes, catRes]) => {
         setStats(sRes.data || {});
         setCustomers(cRes.data.customers || []);
         setVendors(vRes.data.vendors || []);
+        setProducts(pRes.data.products || []);
+        setCategories(catRes.data.categories || []);
       })
       .catch((err) => {
         console.error(err);
@@ -82,6 +88,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const triggerWorkflow = async (type) => {
+    const toastId = toast.loading(`Triggering ${type} workflow...`);
+    try {
+      await API.post(`/admin/trigger/${type}`);
+      toast.success(`${type} workflow executed successfully`, { id: toastId });
+    } catch (err) {
+      toast.error(err.response?.data?.error || `Failed to trigger ${type} workflow`, { id: toastId });
+    }
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Syncing Master Control..." /></div>;
 
   const summary = stats || {};
@@ -94,11 +110,15 @@ export default function AdminDashboard() {
   ];
 
   const revenueData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+    labels: stats?.monthly_summary?.length > 0 
+      ? stats.monthly_summary.map(m => m.month).reverse() 
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
         label: 'Revenue Growth',
-        data: [30000, 45000, 42000, 60000, 55000, 80000, summary.total_revenue || 95000],
+        data: stats?.monthly_summary?.length > 0 
+          ? stats.monthly_summary.map(m => m.revenue).reverse() 
+          : [30000, 45000, 42000, 60000, 55000, 80000, 95000],
         borderColor: '#8b5cf6',
         backgroundColor: 'rgba(139, 92, 246, 0.1)',
         fill: true,
@@ -111,15 +131,20 @@ export default function AdminDashboard() {
   };
 
   const categoryData = {
-    labels: ['Audio', 'Mobiles', 'Laptops', 'Accessories'],
+    labels: stats?.category_distribution?.length > 0 
+      ? stats.category_distribution.map(c => c.name) 
+      : ['Audio', 'Mobiles', 'Laptops', 'Accessories'],
     datasets: [
       {
-        data: [35, 45, 20, 15],
+        data: stats?.category_distribution?.length > 0 
+          ? stats.category_distribution.map(c => c.count) 
+          : [35, 45, 20, 15],
         backgroundColor: [
           'rgba(139, 92, 246, 0.8)',
           'rgba(236, 72, 153, 0.8)',
           'rgba(16, 185, 129, 0.8)',
           'rgba(245, 158, 11, 0.8)',
+          'rgba(59, 130, 246, 0.8)',
         ],
         hoverOffset: 20,
         borderWidth: 0,
@@ -127,10 +152,39 @@ export default function AdminDashboard() {
     ],
   };
 
+  const addCategory = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const name = formData.get('name');
+    const description = formData.get('description');
+
+    try {
+      const res = await API.post('/admin/categories', { name, description });
+      setCategories(prev => [...prev, res.data.category]);
+      toast.success('Category created');
+      e.target.reset();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to create category');
+    }
+  };
+
+  const deleteCategory = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    try {
+      await API.delete(`/admin/categories/${id}`);
+      setCategories(prev => prev.filter(c => c.category_id !== id));
+      toast.success('Category removed');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Deletion restricted (products assigned)');
+    }
+  };
+
   const tabs = [
     { key: 'overview', label: 'Platform Overview', icon: Globe },
     { key: 'customers', label: 'Customer Management', icon: Users },
     { key: 'vendors', label: 'Vendor Approval', icon: Store },
+    { key: 'products', label: 'Catalog Control', icon: Package },
+    { key: 'categories', label: 'Taxonomy', icon: ShieldCheck },
   ];
 
   return (
@@ -147,6 +201,32 @@ export default function AdminDashboard() {
             <span className="text-xs font-black uppercase tracking-widest text-surface-600 dark:text-surface-300">Operational Integrity: 100%</span>
           </div>
         </header>
+
+        {/* Automation Command Cluster */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {[
+            { label: 'Weekly Digest', icon: ShieldCheck, type: 'weekly-digest', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+            { label: 'Low Stock Alert', icon: Activity, type: 'low-stock', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+            { label: 'Abandoned Carts', icon: ShoppingBag, type: 'abandoned-carts', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+          ].map(btn => (
+            <button
+              key={btn.type}
+              onClick={() => triggerWorkflow(btn.type)}
+              className="group flex items-center justify-between p-6 rounded-[32px] bg-surface-50 dark:bg-white/[0.03] border border-surface-200 dark:border-white/5 hover:border-primary-500 transition-all duration-500"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl ${btn.bg} flex items-center justify-center ${btn.color} group-hover:scale-110 transition-transform duration-500`}>
+                  <btn.icon className="w-6 h-6 stroke-[2]" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-1">Automation</p>
+                  <p className="font-black text-surface-950 dark:text-white tracking-tight">{btn.label}</p>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-surface-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+            </button>
+          ))}
+        </div>
 
         {/* Studio Tabs */}
         <div className="flex gap-4 mb-12 overflow-x-auto pb-4 scrollbar-hide">
@@ -293,6 +373,73 @@ export default function AdminDashboard() {
                             }`}
                         >
                           {(tab === 'customers' ? item.is_active : item.is_approved) ? <XCircle className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Catalog Control Tab */}
+        {tab === 'products' && (
+          <div className="glass rounded-[48px] overflow-hidden border border-surface-200 dark:border-white/5 shadow-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead><tr className="bg-surface-50 dark:bg-white/[0.03]">
+                  <th className="text-left text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Product Identity</th>
+                  <th className="text-left text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Vendor Origin</th>
+                  <th className="text-left text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Stock Integrity</th>
+                  <th className="text-right text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Valuation</th>
+                </tr></thead>
+                <tbody>
+                  {products.map(p => (
+                    <tr key={p.product_id} className="border-b border-surface-100 dark:border-white/5 hover:bg-primary-500/[0.02] transition-all">
+                      <td className="py-8 px-10 font-black text-surface-950 dark:text-white tracking-tight">{p.name}</td>
+                      <td className="py-8 px-10 text-sm font-medium text-surface-500">{p.vendor_store || 'Independent'}</td>
+                      <td className="py-8 px-10">
+                        <span className={`text-xs font-black ${p.stock_qty < 10 ? 'text-red-500' : 'text-emerald-500'}`}>
+                          {p.stock_qty} Units
+                        </span>
+                      </td>
+                      <td className="py-8 px-10 text-right font-black text-surface-950 dark:text-white">{formatPrice(p.price)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Category Control Tab */}
+        {tab === 'categories' && (
+          <div className="space-y-12">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass p-10 rounded-[48px] border border-surface-200 dark:border-white/5">
+              <h3 className="text-2xl font-black text-surface-950 dark:text-white mb-8 tracking-tighter">Expand Platform <span className="text-primary-500">Taxonomy.</span></h3>
+              <form onSubmit={addCategory} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <input name="name" placeholder="Category Name" required className="px-6 py-4 rounded-2xl bg-surface-100 dark:bg-white/5 border-none text-sm font-medium focus:ring-2 ring-primary-500 transition-all outline-none" />
+                <input name="description" placeholder="Short description..." className="px-6 py-4 rounded-2xl bg-surface-100 dark:bg-white/5 border-none text-sm font-medium focus:ring-2 ring-primary-500 transition-all outline-none" />
+                <button type="submit" className="bg-primary-500 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-primary-600 transition-all shadow-xl shadow-primary-500/20">Authorize New Sector</button>
+              </form>
+            </motion.div>
+
+            <div className="glass rounded-[48px] overflow-hidden border border-surface-200 dark:border-white/5 shadow-2xl">
+              <table className="w-full">
+                <thead><tr className="bg-surface-50 dark:bg-white/[0.03]">
+                  <th className="text-left text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Sector Name</th>
+                  <th className="text-left text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Description</th>
+                  <th className="text-right text-[10px] font-black text-surface-400 uppercase py-8 px-10 tracking-[0.2em]">Actions</th>
+                </tr></thead>
+                <tbody>
+                  {categories.map(c => (
+                    <tr key={c.category_id} className="border-b border-surface-100 dark:border-white/5 hover:bg-primary-500/[0.02] transition-all">
+                      <td className="py-8 px-10 font-black text-surface-950 dark:text-white tracking-tight">{c.name}</td>
+                      <td className="py-8 px-10 text-sm font-medium text-surface-500">{c.description || 'No description provided'}</td>
+                      <td className="py-8 px-10 text-right">
+                        <button onClick={() => deleteCategory(c.category_id)} className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all ml-auto">
+                          <XCircle className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>

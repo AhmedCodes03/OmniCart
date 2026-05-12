@@ -163,7 +163,18 @@ def platform_stats():
         .all()
     )
 
-    # Counts; single scalar query per table
+    # Category Distribution
+    category_dist = (
+        db.session.query(
+            Category.name,
+            func.count(Product.product_id).label("count")
+        )
+        .join(Product, Category.category_id == Product.category_id)
+        .group_by(Category.name)
+        .all()
+    )
+
+    # Counts
     total_customers = Customer.query.filter_by(is_active=True).count()
     total_vendors = Vendor.query.filter_by(is_active=True, is_approved=True).count()
     total_products = Product.query.filter_by(is_active=True).count()
@@ -191,6 +202,10 @@ def platform_stats():
             }
             for r in top_products
         ],
+        "category_distribution": [
+            {"name": r.name, "count": r.count}
+            for r in category_dist
+        ]
     }), 200
 
 
