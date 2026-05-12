@@ -32,10 +32,11 @@ export default function Checkout() {
       const newOrderId = res.data.order_id;
 
       // Map payment method for backend
-      let mappedMethod = method;
-      if (method === 'cash') mappedMethod = 'cash_on_delivery';
-      else if (method === 'card') mappedMethod = 'credit_card';
-      else if (method === 'bank') mappedMethod = 'bank_transfer';
+      const mappedMethod = {
+        'cash': 'cash_on_delivery',
+        'card': 'credit_card',
+        'bank_transfer': 'bank_transfer'
+      }[method] || method;
 
       // Process payment
       await API.post('/payments', {
