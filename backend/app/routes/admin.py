@@ -1,26 +1,31 @@
 """
 ADMIN ROUTES
-==========================================
-GET  /api/admin/users                    - list customers + vendors
-POST /api/admin/deactivate               - calls DeactivateUser stored proc
-GET  /api/admin/stats                    - platform-wide analytics
-GET  /api/admin/vendors/pending          - unapproved vendors
-POST /api/admin/vendors/<id>/approve     - approve vendor
-GET  /api/admin/products                 - full catalog
-GET  /api/admin/categories               - list all categories
-POST /api/admin/categories               - add category
-DELETE /api/admin/categories/<id>        - delete category (safe FK check)
-GET  /api/admin/all-customers            - all active customers (n8n weekly digest)
-GET  /api/admin/low-stock                - low stock products  (n8n alert)
-GET  /api/admin/abandoned-carts          - carts older than 24 h (n8n abandonment)
+=======================================================
+GET  /api/admin/users                           - list customers + vendors
+POST /api/admin/deactivate                      - calls DeactivateUser stored proc
+GET  /api/admin/stats                           - platform-wide analytics
+GET  /api/admin/vendors/pending                 - unapproved vendors
+POST /api/admin/vendors/<id>/approve            - approve vendor
+GET  /api/admin/products                        - full catalog
+GET  /api/admin/categories                      - list all categories
+POST /api/admin/categories                      - add category
+DELETE /api/admin/categories/<id>               - delete category (safe FK check)
+GET  /api/admin/all-customers                   - all active customers (n8n weekly digest)
+GET  /api/admin/low-stock                       - low stock products  (n8n alert)
+GET  /api/admin/abandoned-carts                 - carts older than 24 h (n8n abandonment)
+POST /api/admin/trigger/abandoned-carts         - trigger cart abandonment workflow
+POST /api/admin/trigger/low-stock               - trigger low stock workflow
+POST /api/admin/trigger/weekly-digest           - trigger weekly digest workflow
 """
 
 from datetime import datetime, timedelta, UTC
+import os
+import requests as http_requests
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, text
 from ..extensions import db
-from ..models import Customer, Vendor, Product, Order, OrderItem, Cart, Category
+from ..models import Customer, Vendor, Product, Order, OrderItem, Cart, Category, Recommendation
 from ..middleware.role_required import role_required
 from .validations import clean_str, extract_sp_error
 
@@ -269,7 +274,7 @@ def add_category():
             return jsonify({"error": "Parent category not found"}), 404
 
     cat = Category(
-        name=name,
+        name = name,
         description=clean_str(data.get("description")),
         parent_category_id=parent_id,
     )
@@ -386,3 +391,144 @@ def abandoned_carts():
         "abandoned_carts": list(customer_carts.values()),
         "count": len(customer_carts),
     }), 200
+
+
+# ============================
+# n8n MANUAL TRIGGER ENDPOINTS
+# ============================
+
+@admin_bp.route("/trigger/abandoned-carts", methods=["POST"])
+@jwt_required()
+@role_required("admin")
+def trigger_abandoned_carts():
+    webhook_url = os.getenv("N8N_ABANDONED_CARTS_URL")
+    if not webhook_url:
+        return jsonify({"error": "Workflow URL not configured"}), 500
+
+    cutoff = (datetime.now(UTC) - timedelta(hours=24)).replace(tzinfo=None)
+    rows = (
+        db.session.query(Cart, Customer, Product)
+        .join(Customer, Cart.customer_id == Customer.customer_id)
+        .outerjoin(Product, Cart.product_id == Product.product_id)
+        .filter(Cart.added_at <= cutoff, Customer.is_active == True)
+        .order_by(Cart.customer_id, Cart.added_at.asc())
+        .all()
+    )
+
+    customer_carts = {}
+    for cart_item, customer, product in rows:
+        cid = cart_item.customer_id
+        if cid not in customer_carts:
+            customer_carts[cid] = {
+                "customer_id": cid,
+                "customer_name": customer.name,
+                "customer_email": customer.email,
+                "items": [],
+            }
+        customer_carts[cid]["items"].append({
+            "product_name": product.name if product else None,
+            "quantity": cart_item.quantity,
+            "price": round(float(product.price), 2) if product else None,
+        })
+
+    payload = {
+        "triggered_by": "admin",
+        "abandoned_carts": list(customer_carts.values()),
+        "count": len(customer_carts),
+    }
+
+    try:
+        http_requests.post(webhook_url, json=payload, timeout=5)
+        return jsonify({"message": f"Abandoned carts workflow triggered for {len(customer_carts)} customers"}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to trigger workflow", "detail": str(e)}), 500
+
+
+@admin_bp.route("/trigger/low-stock", methods=["POST"])
+@jwt_required()
+@role_required("admin")
+def trigger_low_stock_workflow():
+    webhook_url = os.getenv("N8N_LOW_STOCK_URL")
+    if not webhook_url:
+        return jsonify({"error": "Workflow URL not configured"}), 500
+
+    threshold = request.args.get("threshold", 10, type=int)
+
+    rows = (
+        db.session.query(Product, Vendor)
+        .outerjoin(Vendor, Product.vendor_id == Vendor.vendor_id)
+        .filter(Product.stock_qty < threshold, Product.is_active == True)
+        .order_by(Product.stock_qty.asc())
+        .all()
+    )
+
+    low_stock_products = []
+    for product, vendor in rows:
+        low_stock_products.append({
+            "product_id": product.product_id,
+            "product_name": product.name,
+            "stock_qty": product.stock_qty,
+            "vendor_email": vendor.email if vendor else None,
+            "vendor_store": vendor.store_name if vendor else None,
+        })
+
+    payload = {
+        "triggered_by": "admin",
+        "low_stock_products": low_stock_products,
+        "count": len(low_stock_products),
+    }
+
+    try:
+        http_requests.post(webhook_url, json=payload, timeout=5)
+        return jsonify({"message": f"Low stock workflow triggered for {len(low_stock_products)} products"}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to trigger workflow", "detail": str(e)}), 500
+
+
+@admin_bp.route("/trigger/weekly-digest", methods=["POST"])
+@jwt_required()
+@role_required("admin")
+def trigger_weekly_digest():
+    webhook_url = os.getenv("N8N_WEEKLY_DIGEST_URL")
+    if not webhook_url:
+        return jsonify({"error": "Workflow URL not configured"}), 500
+
+    customers = Customer.query.filter_by(is_active=True).all()
+
+    customers_data = []
+    for customer in customers:
+        recs = (
+            Recommendation.query
+            .filter_by(customer_id=customer.customer_id)
+            .order_by(Recommendation.score.desc())
+            .limit(5)
+            .all()
+        )
+        rec_list = []
+        for r in recs:
+            rec_list.append({
+                "product_name": r.product.name if r.product else None,
+                "product_price": float(r.product.price) if r.product else None,
+                "explanation": r.explanation,
+                "score": float(r.score),
+            })
+
+        if rec_list:
+            customers_data.append({
+                "customer_id": customer.customer_id,
+                "customer_name": customer.name,
+                "customer_email": customer.email,
+                "recommendations": rec_list,
+            })
+
+    payload = {
+        "triggered_by": "admin",
+        "customers": customers_data,
+        "count": len(customers_data),
+    }
+
+    try:
+        http_requests.post(webhook_url, json=payload, timeout=5)
+        return jsonify({"message": f"Weekly digest triggered for {len(customers_data)} customers"}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to trigger workflow", "detail": str(e)}), 500
