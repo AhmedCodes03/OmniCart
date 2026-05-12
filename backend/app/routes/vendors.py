@@ -304,6 +304,8 @@ def vendor_stats():
         db.session.query(
             Product.product_id,
             Product.name,
+            Product.price,
+            Product.brand,
             Product.stock_qty,
             Product.is_active,
             func.coalesce(func.sum(OrderItem.quantity), 0).label("units_sold"),
@@ -314,6 +316,8 @@ def vendor_stats():
         .group_by(
             Product.product_id,
             Product.name,
+            Product.price,
+            Product.brand,
             Product.stock_qty,
             Product.is_active
         )
@@ -324,12 +328,12 @@ def vendor_stats():
         {
             "product_id": r.product_id,
             "name": r.name,
-            "price": float(r.price),
+            "price": float(r.price or 0),
             "stock_qty": r.stock_qty,
             "is_active": r.is_active,
-            "brand": r.brand,
-            "units_sold": int(r.units_sold),
-            "revenue": round(float(r.revenue), 2),
+            "brand": r.brand or "Studio Spec",
+            "units_sold": int(r.units_sold or 0),
+            "revenue": round(float(r.revenue or 0), 2),
         }
         for r in rows
     ]
