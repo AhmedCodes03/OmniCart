@@ -39,7 +39,7 @@ function Hero() {
               transition={{ delay: 0.2 }}
               className="text-xl sm:text-2xl text-surface-500 dark:text-surface-300 max-w-xl mb-14 leading-relaxed font-bold tracking-tight mx-auto lg:mx-0"
             >
-              Experience a seamless blend of high-end hardware and intuitive design. 
+              Experience a seamless blend of high-end hardware and intuitive design.
               Curated, authenticated, and delivered with precision.
             </motion.p>
 
@@ -82,7 +82,7 @@ function Hero() {
                       <Cpu className="w-6 h-6 text-primary-500 floating" />
                     </div>
                   </div>
-                  
+
                   <div className="p-12 space-y-12">
                     <div className="flex items-center justify-between">
                       <div className="space-y-4">
@@ -93,7 +93,7 @@ function Hero() {
                         <FastZap className="w-10 h-10 text-primary-500 floating" />
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-10">
                       {[Smartphone, Headphones].map((Icon, idx) => (
                         <div key={idx} className="p-10 rounded-[40px] glass border border-surface-200 dark:border-white/5 space-y-6">
@@ -105,7 +105,7 @@ function Hero() {
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="h-24 w-full rounded-[32px] bg-gradient-to-r from-primary-600 to-indigo-600 shadow-2xl flex items-center justify-center relative overflow-hidden group">
                       <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity shimmer" />
                       <span className="text-white text-xs font-black uppercase tracking-[0.5em] relative z-10">Add to Cart</span>
@@ -123,12 +123,32 @@ function Hero() {
 
 /* ─── Categories ─── */
 function CategoryShowcase() {
-  const categories = [
-    { name: 'Audio', icon: Headphones, color: 'text-violet-500', bg: 'bg-violet-500/10', desc: 'Acoustic Core' },
-    { name: 'Mobiles', icon: Smartphone, color: 'text-blue-500', bg: 'bg-blue-500/10', desc: 'Spatial Neural' },
-    { name: 'Laptops', icon: Laptop, color: 'text-emerald-500', bg: 'bg-emerald-500/10', desc: 'Compute Matrix' },
-    { name: 'Accessories', icon: Cable, color: 'text-amber-500', bg: 'bg-amber-500/10', desc: 'Modular Links' },
-  ];
+  const [categories, setCategories] = useState([
+    { category_id: 2, name: 'Audio', icon: Headphones, color: 'text-violet-500', bg: 'bg-violet-500/10', desc: 'Acoustic Core' },
+    { category_id: 3, name: 'Mobiles', icon: Smartphone, color: 'text-blue-500', bg: 'bg-blue-500/10', desc: 'Spatial Neural' },
+    { category_id: 4, name: 'Laptops', icon: Laptop, color: 'text-emerald-500', bg: 'bg-emerald-500/10', desc: 'Compute Matrix' },
+    { category_id: 5, name: 'Accessories', icon: Cable, color: 'text-amber-500', bg: 'bg-amber-500/10', desc: 'Modular Links' },
+  ]);
+
+  useEffect(() => {
+    API.get('/categories')
+      .then(res => {
+        if (res.data.categories?.length > 0) {
+          const iconMap = {
+            'Audio': { icon: Headphones, color: 'text-violet-500', bg: 'bg-violet-500/10', desc: 'Acoustic Core' },
+            'Mobiles': { icon: Smartphone, color: 'text-blue-500', bg: 'bg-blue-500/10', desc: 'Spatial Neural' },
+            'Laptops': { icon: Laptop, color: 'text-emerald-500', bg: 'bg-emerald-500/10', desc: 'Compute Matrix' },
+            'Accessories': { icon: Cable, color: 'text-amber-500', bg: 'bg-amber-500/10', desc: 'Modular Links' },
+          };
+          const fetched = res.data.categories.map(cat => ({
+            ...cat,
+            ...(iconMap[cat.name] || { icon: Box, color: 'text-primary-500', bg: 'bg-primary-500/10', desc: 'Market Expansion' })
+          }));
+          setCategories(fetched);
+        }
+      })
+      .catch(() => { });
+  }, []);
 
   return (
     <section className="section-padding py-20 relative">
@@ -144,7 +164,7 @@ function CategoryShowcase() {
             Shop by <span className="text-surface-400">Category.</span>
           </h2>
           <p className="text-surface-500 dark:text-surface-300 text-xl leading-relaxed max-w-2xl font-bold">
-            Explore our hand-picked selection of top-tier electronics, 
+            Explore our hand-picked selection of top-tier electronics,
             backed by our quality assurance and authentication protocols.
           </p>
         </motion.div>
@@ -161,7 +181,7 @@ function CategoryShowcase() {
           >
             <BorderGlow className="h-full w-full" borderRadius={50} glowRadius={10} animated={true}>
               <Link
-                to={`/products?search=${cat.name}`}
+                to={`/products?category=${cat.category_id}`}
                 className="p-12 block group relative overflow-hidden h-full transition-all duration-700 hover:scale-[1.03]"
               >
                 <div className={`w-24 h-24 mb-12 rounded-[32px] ${cat.bg} flex items-center justify-center transition-all duration-700 group-hover:scale-110 group-hover:rotate-12 shadow-2xl`}>
@@ -169,7 +189,7 @@ function CategoryShowcase() {
                 </div>
                 <h3 className="font-black text-surface-900 dark:text-white text-3xl mb-4 tracking-tighter">{cat.name}</h3>
                 <p className="text-surface-400 font-black text-[10px] uppercase tracking-[0.3em]">{cat.desc}</p>
-                
+
                 <div className="absolute top-10 right-10 w-12 h-12 rounded-2xl glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
                   <ArrowRight className="w-6 h-6 text-primary-500" />
                 </div>
@@ -193,7 +213,7 @@ function TrendingProducts() {
       .catch(() => {
         API.get('/products?per_page=8&sort_by=created_at&order=desc')
           .then((res) => setProducts(res.data.products || []))
-          .catch(() => {});
+          .catch(() => { });
       })
       .finally(() => setLoading(false));
   }, []);
@@ -270,7 +290,7 @@ function FeaturesSection() {
             Simply <br /> <span className="text-surface-400">Premium.</span>
           </h2>
           <p className="text-xl text-surface-500 dark:text-surface-300 leading-relaxed font-bold mb-16 max-w-2xl">
-            OmniCart Studio is not a simple marketplace; it is a high-performance 
+            OmniCart Studio is not a simple marketplace; it is a high-performance
             ecosystem designed for the next generation of commerce.
           </p>
           <div className="flex items-center gap-16">
@@ -321,35 +341,35 @@ export default function Home() {
       <CategoryShowcase />
       <TrendingProducts />
       <FeaturesSection />
-      
+
       {/* Studio Final CTA */}
       <section className="section-padding py-20">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="shadow-2xl"
-          >
-            <BorderGlow className="w-full" borderRadius={80} glowRadius={10} animated={true}>
-              <div className="relative overflow-hidden p-16 sm:p-32 text-center w-full">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary-500/10 to-transparent pointer-events-none" />
-                <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[140px] floating" />
-                
-                <h2 className="text-7xl sm:text-[9rem] font-black text-surface-900 dark:text-white mb-16 tracking-tighter leading-[0.85] relative z-10">
-                  Start <br /> <span className="gradient-text">Selling.</span>
-                </h2>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-10 relative z-10">
-                  <Link to="/register" className="btn-primary !px-16 !py-8 !rounded-3xl shadow-2xl shadow-primary-500/30 floating">
-                    Create Seller Account
-                  </Link>
-                  <Link to="/login" className="text-surface-900 dark:text-white font-black uppercase tracking-[0.5em] text-[11px] hover:text-primary-500 transition-all">
-                    Sign In to Your Hub
-                  </Link>
-                </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="shadow-2xl"
+        >
+          <BorderGlow className="w-full" borderRadius={80} glowRadius={10} animated={true}>
+            <div className="relative overflow-hidden p-16 sm:p-32 text-center w-full">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary-500/10 to-transparent pointer-events-none" />
+              <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[140px] floating" />
+
+              <h2 className="text-7xl sm:text-[9rem] font-black text-surface-900 dark:text-white mb-16 tracking-tighter leading-[0.85] relative z-10">
+                Start <br /> <span className="gradient-text">Selling.</span>
+              </h2>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-10 relative z-10">
+                <Link to="/register" className="btn-primary !px-16 !py-8 !rounded-3xl shadow-2xl shadow-primary-500/30 floating">
+                  Create Seller Account
+                </Link>
+                <Link to="/login" className="text-surface-900 dark:text-white font-black uppercase tracking-[0.5em] text-[11px] hover:text-primary-500 transition-all">
+                  Sign In to Your Hub
+                </Link>
               </div>
-            </BorderGlow>
-          </motion.div>
-        </section>
+            </div>
+          </BorderGlow>
+        </motion.div>
+      </section>
     </div>
   );
 }

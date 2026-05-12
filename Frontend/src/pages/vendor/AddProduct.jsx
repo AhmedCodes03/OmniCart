@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Sparkles, Package, Terminal, Box, Database } from 'luc
 import API from '../../api/axios';
 import BorderGlow from '../../components/ui/BorderGlow';
 import toast from 'react-hot-toast';
+import StudioDropdown from '../../components/ui/StudioDropdown';
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ export default function AddProduct() {
   }, []);
 
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const catOptions = categories.map(c => ({ value: c.category_id, label: c.name }));
 
   const handleGenerate = async () => {
     if (!form.name || !form.category_id) return toast.error('Enter name & category first');
@@ -82,15 +85,12 @@ export default function AddProduct() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full">
                   <div className="group w-full">
-                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-3 group-focus-within:text-primary-500 transition-colors">Classification *</label>
-                    <div className="relative w-full">
-                      <select value={form.category_id} onChange={(e) => update('category_id', e.target.value)} 
-                        className="input-field !py-5 !px-8 !rounded-2xl border-surface-100 dark:border-white/5 bg-surface-50/50 dark:bg-white/[0.02] appearance-none w-full" required>
-                        <option value="">Select Sector</option>
-                        {categories.map(c => <option key={c.category_id} value={c.category_id}>{c.name}</option>)}
-                      </select>
-                      <Box className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 pointer-events-none" />
-                    </div>
+                    <StudioDropdown 
+                      label="Classification *"
+                      value={form.category_id}
+                      options={catOptions}
+                      onChange={(val) => update('category_id', val)}
+                    />
                   </div>
                   <div className="group w-full">
                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-3 group-focus-within:text-primary-500 transition-colors">Brand Identity</label>

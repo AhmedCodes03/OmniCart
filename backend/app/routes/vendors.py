@@ -355,6 +355,27 @@ def vendor_stats():
 
     history = [{"day": str(r.day), "revenue": float(r.revenue)} for r in history_rows]
 
+    # Recent Orders (Top 5)
+    recent_order_rows = (
+        db.session.query(Order, OrderItem, Product)
+        .join(OrderItem, Order.order_id == OrderItem.order_id)
+        .join(Product, OrderItem.product_id == Product.product_id)
+        .filter(Product.vendor_id == vendor_id)
+        .order_by(Order.placed_at.desc())
+        .limit(20) # Get enough to group into 5 orders
+        .all()
+    )
+    
+    recent_orders_map = {}
+    for o, oi, p in recent_order_rows:
+        if o.order_id not in recent_orders_map and len(recent_orders_map) < 5:
+            recent_orders_map[o.order_id] = {**o.to_dict(), "items": []}
+        if o.order_id in recent_orders_map:
+            item_data = oi.to_dict()
+            item_data["product_name"] = p.name
+            item_data["subtotal"] = round(float(oi.unit_price) * oi.quantity, 2)
+            recent_orders_map[o.order_id]["items"].append(item_data)
+
     return jsonify({
         "total_revenue": total_revenue,
         "total_units_sold": total_units,
@@ -362,5 +383,6 @@ def vendor_stats():
         "low_stock_count": len(low_stock),
         "products": product_stats,
         "low_stock_products": low_stock,
-        "sales_history": history
+        "sales_history": history,
+        "recent_orders": list(recent_orders_map.values())
     }), 200

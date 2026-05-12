@@ -4,16 +4,37 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Package, Calendar, User, ChevronRight } from 'lucide-react';
 import API from '../../api/axios';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import toast from 'react-hot-toast';
+import StudioDropdown from '../../components/ui/StudioDropdown';
 
 export default function VendorOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const statusOptions = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'shipped', label: 'Shipped' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ];
+
   useEffect(() => {
-    API.get('/orders/vendor').then(r => setOrders(r.data.orders || [])).catch(() => {}).finally(() => setLoading(false));
+    API.get('/vendor/orders').then(r => setOrders(r.data.orders || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const formatPrice = (p) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(p);
+
+  const updateStatus = async (orderId, newStatus) => {
+    try {
+      await API.put(`/orders/${orderId}/status`, { status: newStatus });
+      setOrders(prev => prev.map(o => o.order_id === orderId ? { ...o, status: newStatus } : o));
+      toast.success(`Order #${orderId} marked as ${newStatus}`);
+    } catch (err) {
+      toast.error('Failed to update status');
+    }
+  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Retrieving Ledger..." /></div>;
 
@@ -46,13 +67,15 @@ export default function VendorOrders() {
                 
                 <div className="flex flex-col lg:flex-row justify-between gap-12 relative z-10">
                   <div className="flex-1">
-                    <div className="flex items-center gap-6 mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-6">
                       <h3 className="font-black text-2xl text-surface-950 dark:text-white tracking-tighter">Allocation #{o.order_id}</h3>
-                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                        o.status === 'delivered' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' :
-                        o.status === 'cancelled' ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400' :
-                        'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
-                      }`}>{o.status}</span>
+                      <div className="w-56">
+                        <StudioDropdown 
+                          value={o.status} 
+                          options={statusOptions}
+                          onChange={(val) => updateStatus(o.order_id, val)}
+                        />
+                      </div>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-8 text-[10px] font-black text-surface-400 uppercase tracking-widest">

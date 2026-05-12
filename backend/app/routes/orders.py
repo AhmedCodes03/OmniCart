@@ -7,6 +7,7 @@ GET  /api/orders/<id>            - order detail with items
 POST /api/orders/<id>/cancel     - cancel order (calls CancelOrder stored proc)
 POST /api/payments               - process payment (calls ProcessPayment stored proc)
 GET  /api/payments/<order_id>    - get payment for order (ownership verified)
+PUT  /api/orders/<id>/status      - update order status (vendor/admin only)
 """
 
 import os

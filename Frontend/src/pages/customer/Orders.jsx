@@ -4,16 +4,32 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Calendar, Package, ChevronRight, Activity } from 'lucide-react';
 import API from '../../api/axios';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchOrders = () => {
     API.get('/orders').then(res => setOrders(res.data.orders || [])).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(fetchOrders, []);
 
   const formatPrice = (p) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(p);
+
+  const handleCancel = async (e, id) => {
+    e.preventDefault();
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+    
+    try {
+      await API.post(`/orders/${id}/cancel`);
+      toast.success('Order cancelled successfully');
+      fetchOrders();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Cancellation failed');
+    }
+  };
 
   const getStatusStyle = (s) => {
     switch(s) {
@@ -72,6 +88,14 @@ export default function Orders() {
 
                     <div className="flex flex-col sm:flex-row items-center gap-10 lg:text-right">
                       <div className="text-center sm:text-right">
+                        {(o.status === 'pending' || o.status === 'confirmed') && (
+                          <button 
+                            onClick={(e) => handleCancel(e, o.order_id)}
+                            className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-4 block hover:opacity-70 transition-opacity"
+                          >
+                            Cancel Allocation
+                          </button>
+                        )}
                         <p className="text-[10px] font-black text-surface-400 uppercase tracking-[0.2em] mb-2">Total Acquisition Value</p>
                         <p className="text-3xl font-black text-surface-950 dark:text-white tracking-tighter group-hover:gradient-text transition-all">{formatPrice(o.total_amount)}</p>
                       </div>

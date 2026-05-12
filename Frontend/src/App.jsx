@@ -26,6 +26,7 @@ import OrderDetail from './pages/customer/OrderDetail';
 import VendorDashboard from './pages/vendor/Dashboard';
 import MyProducts from './pages/vendor/MyProducts';
 import AddProduct from './pages/vendor/AddProduct';
+import EditProduct from './pages/vendor/EditProduct';
 import VendorOrders from './pages/vendor/VendorOrders';
 
 // Admin
@@ -75,6 +76,7 @@ export default function App() {
                 <Route path="/vendor" element={<ProtectedRoute allowedRoles={['vendor']}><VendorDashboard /></ProtectedRoute>} />
                 <Route path="/vendor/products" element={<ProtectedRoute allowedRoles={['vendor']}><MyProducts /></ProtectedRoute>} />
                 <Route path="/vendor/products/add" element={<ProtectedRoute allowedRoles={['vendor']}><AddProduct /></ProtectedRoute>} />
+                <Route path="/vendor/products/edit/:id" element={<ProtectedRoute allowedRoles={['vendor']}><EditProduct /></ProtectedRoute>} />
                 <Route path="/vendor/orders" element={<ProtectedRoute allowedRoles={['vendor']}><VendorOrders /></ProtectedRoute>} />
 
                 {/* Admin */}

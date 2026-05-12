@@ -27,6 +27,12 @@ export default function Products() {
       params.set('page', p);
       params.set('per_page', '12');
       
+      const catId = searchParams.get('category');
+      const searchTerm = searchParams.get('search');
+      
+      if (catId) params.set('category_id', catId);
+      if (searchTerm || search) params.set('q', searchTerm || search);
+
       // Map sort values to backend sort_by and order
       if (sort === 'newest') {
         params.set('sort_by', 'created_at');
@@ -39,7 +45,6 @@ export default function Products() {
         params.set('order', 'desc');
       }
 
-      if (search) params.set('q', search);
       if (minPrice) params.set('min_price', minPrice);
       if (maxPrice) params.set('max_price', maxPrice);
       
