@@ -338,6 +338,23 @@ def vendor_stats():
     total_revenue = round(sum(p["revenue"] for p in product_stats), 2)
     total_units = sum(p["units_sold"] for p in product_stats)
 
+    # 7-Day Sales History for the Chart
+    history_rows = (
+        db.session.query(
+            func.date(Order.placed_at).label("day"),
+            func.sum(OrderItem.quantity * OrderItem.unit_price).label("revenue")
+        )
+        .join(OrderItem, Order.order_id == OrderItem.order_id)
+        .join(Product, OrderItem.product_id == Product.product_id)
+        .filter(Product.vendor_id == vendor_id)
+        .filter(Order.placed_at >= func.date_sub(func.now(), text("INTERVAL 7 DAY")))
+        .group_by(func.date(Order.placed_at))
+        .order_by(func.date(Order.placed_at))
+        .all()
+    )
+
+    history = [{"day": str(r.day), "revenue": float(r.revenue)} for r in history_rows]
+
     return jsonify({
         "total_revenue": total_revenue,
         "total_units_sold": total_units,
@@ -345,4 +362,5 @@ def vendor_stats():
         "low_stock_count": len(low_stock),
         "products": product_stats,
         "low_stock_products": low_stock,
+        "sales_history": history
     }), 200
