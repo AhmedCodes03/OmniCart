@@ -42,9 +42,21 @@ export default function ProductCard({ product, index = 0 }) {
 
           {/* Visual Terminal Area */}
           <div className={`relative h-56 sm:h-64 rounded-[30px] bg-gradient-to-br ${gradients[index % gradients.length]} mb-6 flex items-center justify-center overflow-hidden border border-surface-100 dark:border-white/5`}>
-            <div className="text-7xl font-black text-surface-950/5 dark:text-white/5 group-hover:scale-150 group-hover:rotate-12 transition-all duration-[1.5s] ease-out select-none">
-              {product.brand?.[0] || product.name?.[0] || 'O'}
-            </div>
+            {product.image_url ? (
+              <img 
+                src={product.image_url} 
+                alt={product.name} 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="text-7xl font-black text-surface-950/5 dark:text-white/5 group-hover:scale-150 group-hover:rotate-12 transition-all duration-[1.5s] ease-out select-none">
+                {product.brand?.[0] || product.name?.[0] || 'O'}
+              </div>
+            )}
 
             {/* Rapid Action Interface */}
             <div className="absolute inset-0 bg-surface-950/0 group-hover:bg-surface-950/60 backdrop-blur-[2px] transition-all duration-700 flex items-center justify-center gap-5 opacity-0 group-hover:opacity-100">

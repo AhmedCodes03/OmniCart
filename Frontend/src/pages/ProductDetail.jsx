@@ -108,9 +108,21 @@ export default function ProductDetail() {
             <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-transparent pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-primary-500/[0.03] rounded-full floating" />
             
-            <span className="text-[15rem] font-black text-surface-950/5 dark:text-white/5 select-none transition-transform duration-[2s] group-hover:scale-125 group-hover:rotate-6">
-              {product.brand?.[0] || product.name?.[0]}
-            </span>
+            {product.image_url ? (
+              <img 
+                src={product.image_url} 
+                alt={product.name} 
+                className="w-full h-full object-contain relative z-10 transition-transform duration-[2s] group-hover:scale-110"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <span className="text-[15rem] font-black text-surface-950/5 dark:text-white/5 select-none transition-transform duration-[2s] group-hover:scale-125 group-hover:rotate-6">
+                {product.brand?.[0] || product.name?.[0]}
+              </span>
+            )}
 
             {product.brand && (
               <div className="absolute top-12 right-12 px-8 py-3 rounded-full glass border border-primary-500/20 shadow-xl">

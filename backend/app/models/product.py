@@ -14,6 +14,7 @@ class Product(db.Model):
     stock_qty = db.Column(db.Integer, default=0)
     brand = db.Column(db.String(100))
     is_active = db.Column(db.Boolean, default=True)
+    image_url = db.Column(db.String(500))
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.now())
 
     # Relationships
@@ -29,9 +30,6 @@ class Product(db.Model):
         db.Index("idx_category", "category_id"),
     )
 
-    def __init__(self, **kwargs):
-        super(Product, self).__init__(**kwargs)
-
     def to_dict(self):
 
         ratings = [r.rating for r in self.reviews]
@@ -46,6 +44,7 @@ class Product(db.Model):
             "price": float(self.price),
             "stock_qty": self.stock_qty,
             "brand": self.brand,
+            "image_url": self.image_url,
             "is_active": self.is_active,
             "avg_rating": avg_rating,
             "review_count": len(ratings),

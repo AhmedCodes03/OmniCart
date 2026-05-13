@@ -102,6 +102,7 @@ def add_product():
         price=price,
         stock_qty=stock,
         brand=clean_str(data.get("brand")),
+        image_url=clean_str(data.get("image_url")),
         is_active=True,
     )
     db.session.add(product)
@@ -215,6 +216,8 @@ def update_product(product_id):
             product.description = clean_str(data["description"]) or None
         if "brand" in data:
             product.brand = clean_str(data["brand"]) or None
+        if "image_url" in data:
+            product.image_url = clean_str(data["image_url"]) or None
         if new_category_id:
             product.category_id = new_category_id
 

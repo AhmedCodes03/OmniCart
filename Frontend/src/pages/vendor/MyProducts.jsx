@@ -65,8 +65,12 @@ export default function MyProducts() {
                     <tr key={p.product_id} className="border-b border-surface-100 dark:border-white/5 hover:bg-primary-500/[0.02] transition-all group">
                       <td className="py-8 px-10">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-surface-100 dark:bg-white/5 flex items-center justify-center text-surface-300 group-hover:text-primary-500 group-hover:bg-primary-500/10 transition-all">
-                            <Package className="w-6 h-6" />
+                          <div className="w-12 h-12 rounded-2xl bg-surface-100 dark:bg-white/5 flex items-center justify-center text-surface-300 group-hover:text-primary-500 group-hover:bg-primary-500/10 transition-all overflow-hidden border border-surface-100 dark:border-white/5">
+                            {p.image_url ? (
+                              <img src={p.image_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-6 h-6" />
+                            )}
                           </div>
                           <span className="font-black text-surface-950 dark:text-white tracking-tight text-lg">{p.name}</span>
                         </div>

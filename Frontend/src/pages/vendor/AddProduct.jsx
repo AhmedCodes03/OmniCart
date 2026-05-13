@@ -11,7 +11,7 @@ export default function AddProduct() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [genLoading, setGenLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', price: '', stock_qty: '', brand: '', category_id: '' });
+  const [form, setForm] = useState({ name: '', description: '', price: '', stock_qty: '', brand: '', category_id: '', image_url: '' });
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -99,6 +99,26 @@ export default function AddProduct() {
                       className="input-field !py-5 !px-8 !rounded-2xl border-surface-100 dark:border-white/5 bg-surface-50/50 dark:bg-white/[0.02] w-full" />
                   </div>
                 </div>
+              </div>
+            </div>
+          </BorderGlow>
+          
+          {/* Visual Assets */}
+          <BorderGlow className="w-full" borderRadius={48} glowRadius={10} animated={true}>
+            <div className="p-10 sm:p-12 relative overflow-hidden w-full">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                  <Box className="w-5 h-5" />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-surface-950 dark:text-white">Visual Assets</h3>
+              </div>
+              
+              <div className="group w-full">
+                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-surface-400 mb-3 group-focus-within:text-indigo-500 transition-colors">Product Image URL</label>
+                <input type="url" value={form.image_url} onChange={(e) => update('image_url', e.target.value)} 
+                  placeholder="https://images.unsplash.com/photo-..." 
+                  className="input-field !py-5 !px-8 !rounded-2xl border-surface-100 dark:border-white/5 bg-surface-50/50 dark:bg-white/[0.02] w-full" />
+                <p className="mt-4 text-[10px] text-surface-400 font-medium">Provide a direct link to a high-resolution JPEG/PNG asset.</p>
               </div>
             </div>
           </BorderGlow>
