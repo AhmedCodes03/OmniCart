@@ -10,6 +10,7 @@ GET  /api/payments/<order_id>    - get payment for order (ownership verified)
 PUT  /api/orders/<id>/status      - update order status (vendor/admin only)
 """
 
+from flask_jwt_extended import get_jwt
 import os
 import json
 import requests as http_requests
@@ -352,4 +353,4 @@ def update_order_status(order_id):
         "message": f"Order status updated to {new_status}",
         "order_id": order_id,
         "status": new_status
-    }), 200
+    }), 200
