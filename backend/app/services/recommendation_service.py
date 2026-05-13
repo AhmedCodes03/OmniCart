@@ -121,24 +121,31 @@ def get_svd_recommendations(user_id: str, product_ids: list, top_n: int = 5) -> 
 
 def get_hybrid_recommendations(customer_id: int, product_ids: list, recently_viewed_id: int = None, top_n: int = 5) -> list:
     try:
-        svd_scores = dict(get_svd_recommendations(str(customer_id), product_ids, top_n=len(product_ids)))
+        svd_results = get_svd_recommendations(str(customer_id), product_ids, top_n=len(product_ids))
+        svd_scores = dict(svd_results) if svd_results else {}
+        
         tfidf_scores = {}
         if recently_viewed_id:
             similar = get_similar_products(recently_viewed_id, top_n=len(product_ids))
-            tfidf_scores = dict(similar)
+            tfidf_scores = dict(similar) if similar else {}
+            
+        # Normalize SVD scores if they exist
         if svd_scores:
-            min_s = min(svd_scores.values())
-            max_s = max(svd_scores.values())
+            vals = list(svd_scores.values())
+            min_s, max_s = min(vals), max(vals)
             rng = max_s - min_s if max_s != min_s else 1
             svd_scores = {k: (v - min_s) / rng for k, v in svd_scores.items()}
+            
         hybrid = []
         for pid in product_ids:
             svd_s = svd_scores.get(pid, 0.5)
             tfidf_s = tfidf_scores.get(pid, 0.0)
+            # Combine scores (60% Collaborative, 40% Content-Based)
             combined = (0.6 * svd_s) + (0.4 * tfidf_s) if tfidf_scores else svd_s
             hybrid.append((pid, round(combined, 4)))
+            
         hybrid.sort(key=lambda x: x[1], reverse=True)
         return hybrid[:top_n]
     except Exception as e:
-        print(f"Hybrid error: {e}")
+        print(f"Hybrid recommendation error: {e}")
         return [(pid, 0.5) for pid in product_ids[:top_n]]

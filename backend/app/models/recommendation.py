@@ -21,7 +21,11 @@ class Recommendation(db.Model):
         db.Index("idx_customer_rec", "customer_id"),
     )
 
+    def __init__(self, **kwargs):
+        super(Recommendation, self).__init__(**kwargs)
+
     def to_dict(self):
+
         return {
             "rec_id": self.rec_id,
             "customer_id": self.customer_id,

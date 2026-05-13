@@ -28,42 +28,48 @@ export default function ProductDetail() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      API.get(`/products/${id}`),
-      API.get(`/products/${id}/reviews`),
-      API.get(`/recommendations/similar/${id}`).catch(() => ({ data: { similar: [] } })),
-    ]).then(async ([pRes, rRes, sRes]) => {
-      setProduct(pRes.data);
-      setReviews(rRes.data.reviews || []);
-      const similarProducts = sRes.data.similar || [];
-      setSimilar(similarProducts);
-      setReviewStats({
-        avg_sentiment: rRes.data.avg_sentiment,
-        total_reviews: rRes.data.total_reviews
+    // 1. Core Data - Load this first
+    API.get(`/products/${id}`)
+      .then(res => {
+        setProduct(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error('Product not found');
+        setLoading(false);
       });
 
-      // If logged in, fetch AI explanations for similar products
-      if (isAuthenticated && role === 'customer' && similarProducts.length > 0) {
-        const explained = await Promise.all(
-          similarProducts.slice(0, 3).map(async (p) => {
-            try {
-              const res = await API.post('/recommendations/explain', { product_id: p.product_id });
-              return { ...p, ai_explanation: res.data.explanation };
-            } catch { return p; }
-          })
-        );
-        setSimilar(prev => {
-          const updated = [...prev];
-          explained.forEach(exp => {
-            const idx = updated.findIndex(u => u.product_id === exp.product_id);
-            if (idx !== -1) updated[idx] = exp;
-          });
-          return updated;
+    // 2. Secondary Data - Load in background
+    API.get(`/products/${id}/reviews`)
+      .then(res => {
+        setReviews(res.data.reviews || []);
+        setReviewStats({
+          avg_sentiment: res.data.avg_sentiment,
+          total_reviews: res.data.total_reviews
         });
-      }
-    }).catch(() => toast.error('Product not found'))
-      .finally(() => setLoading(false));
+      })
+      .catch(() => {});
+
+    API.get(`/recommendations/similar/${id}`)
+      .then(async res => {
+        const similarProducts = res.data.similar || [];
+        setSimilar(similarProducts);
+
+        // Fetch AI explanations only if logged in
+        if (isAuthenticated && role === 'customer' && similarProducts.length > 0) {
+          similarProducts.slice(0, 3).forEach(async (p) => {
+            try {
+              const expRes = await API.post('/recommendations/explain', { product_id: p.product_id });
+              setSimilar(prev => prev.map(item => 
+                item.product_id === p.product_id ? { ...item, ai_explanation: expRes.data.explanation } : item
+              ));
+            } catch {}
+          });
+        }
+      })
+      .catch(() => setSimilar([]));
   }, [id, isAuthenticated, role]);
+
 
 
   const handleReview = async (e) => {

@@ -29,7 +29,8 @@ def get_recommendations():
             data.append(d)
         return jsonify({"recommendations": data, "source": "stored", "total": len(data)}), 200
 
-    all_products = Product.query.filter_by(is_active=True).all()
+    # Optimization: Only score the top 200 most recent/active products to avoid bottlenecking
+    all_products = Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).limit(200).all()
     product_ids  = [p.product_id for p in all_products]
     if not product_ids:
         return jsonify({"recommendations": [], "message": "No products available"}), 200
