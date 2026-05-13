@@ -307,3 +307,49 @@ def get_payment(order_id):
         return jsonify({"error": "No payment found for this order"}), 404
 
     return jsonify({"payment": payment.to_dict()}), 200
+
+
+# =====================================================
+# UPDATE ORDER STATUS - Vendor / Admin only
+# =====================================================
+@orders_bp.route("/orders/<int:order_id>/status", methods=["PUT"])
+@jwt_required()
+@role_required("vendor", "admin")
+def update_order_status(order_id):
+    user_id = int(get_jwt_identity())
+    claims = get_jwt()
+    role = claims.get("role")
+    data = request.get_json() or {}
+    new_status = data.get("status")
+
+    if not new_status:
+        return jsonify({"error": "'status' is required"}), 400
+
+    # Validate status value
+    valid_statuses = {"pending", "confirmed", "processing", "shipped", "delivered", "cancelled"}
+    if new_status not in valid_statuses:
+        return jsonify({"error": f"Invalid status. Allowed: {', '.join(sorted(valid_statuses))}"}), 400
+
+    order = Order.query.get(order_id)
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    # Authorization check:
+    # Admin can update any order.
+    # Vendor can update if they have at least one product in the order.
+    if role == "vendor":
+        vendor_item = OrderItem.query.join(Product).filter(
+            OrderItem.order_id == order_id,
+            Product.vendor_id == user_id
+        ).first()
+        if not vendor_item:
+            return jsonify({"error": "Unauthorized: this order does not contain your products"}), 403
+
+    order.status = new_status
+    db.session.commit()
+
+    return jsonify({
+        "message": f"Order status updated to {new_status}",
+        "order_id": order_id,
+        "status": new_status
+    }), 200

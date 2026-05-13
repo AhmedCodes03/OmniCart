@@ -14,6 +14,9 @@ class Category(db.Model):
     subcategories = db.relationship("Category", back_populates="parent")
     products = db.relationship("Product", back_populates="category")
 
+    def __init__(self, **kwargs):
+        super(Category, self).__init__(**kwargs)
+
     def to_dict(self):
         return {
             "category_id": self.category_id,

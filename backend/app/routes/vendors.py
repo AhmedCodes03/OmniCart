@@ -14,7 +14,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import text, func
 from ..extensions import db
-from ..models import Product, Category, Order, OrderItem
+from ..models import Product, Category, Order, OrderItem, Customer
 from ..middleware.role_required import role_required
 from .validations import clean_str, extract_sp_error
 
@@ -259,9 +259,10 @@ def vendor_orders():
     vendor_id = int(get_jwt_identity())
 
     rows = (
-        db.session.query(Order, OrderItem, Product)
+        db.session.query(Order, OrderItem, Product, Customer)
         .join(OrderItem, Order.order_id == OrderItem.order_id)
         .join(Product, OrderItem.product_id == Product.product_id)
+        .join(Customer, Order.customer_id == Customer.customer_id)
         .filter(Product.vendor_id == vendor_id)
         .order_by(Order.placed_at.desc())
         .all()
@@ -273,14 +274,16 @@ def vendor_orders():
     # Group line items under their parent order using an ordered dict
     # to preserve placed_at DESC sort from the query above
     orders_map: dict = {}
-    for order, oi, product in rows:
+    for order, oi, product, customer in rows:
         oid = order.order_id
         if oid not in orders_map:
             orders_map[oid] = {
                 **order.to_dict(),
+                "customer_name": customer.name,
                 "items": [],
             }
         item_data = oi.to_dict()
+
         # Safe: product reference may be stale in edge cases
         item_data["product_name"] = product.name if product else None
         item_data["product_brand"] = product.brand if product else None
@@ -353,7 +356,8 @@ def vendor_stats():
         .join(OrderItem, Order.order_id == OrderItem.order_id)
         .join(Product, OrderItem.product_id == Product.product_id)
         .filter(Product.vendor_id == vendor_id)
-        .filter(Order.placed_at >= func.date_sub(func.now(), text("INTERVAL 7 DAY")))
+        .filter(Order.placed_at >= text("DATE_SUB(NOW(), INTERVAL 7 DAY)"))
+
         .group_by(func.date(Order.placed_at))
         .order_by(func.date(Order.placed_at))
         .all()
@@ -361,26 +365,29 @@ def vendor_stats():
 
     history = [{"day": str(r.day), "revenue": float(r.revenue)} for r in history_rows]
 
-    # Recent Orders (Top 5)
-    recent_order_rows = (
-        db.session.query(Order, OrderItem, Product)
+    recent_orders_map = {}
+    for o, oi, p, c in (
+        db.session.query(Order, OrderItem, Product, Customer)
         .join(OrderItem, Order.order_id == OrderItem.order_id)
         .join(Product, OrderItem.product_id == Product.product_id)
+        .join(Customer, Order.customer_id == Customer.customer_id)
         .filter(Product.vendor_id == vendor_id)
         .order_by(Order.placed_at.desc())
-        .limit(20) # Get enough to group into 5 orders
+        .limit(30)
         .all()
-    )
-    
-    recent_orders_map = {}
-    for o, oi, p in recent_order_rows:
+    ):
         if o.order_id not in recent_orders_map and len(recent_orders_map) < 5:
-            recent_orders_map[o.order_id] = {**o.to_dict(), "items": []}
+            recent_orders_map[o.order_id] = {
+                **o.to_dict(),
+                "customer_name": c.name,
+                "items": []
+            }
         if o.order_id in recent_orders_map:
             item_data = oi.to_dict()
             item_data["product_name"] = p.name
             item_data["subtotal"] = round(float(oi.unit_price) * oi.quantity, 2)
             recent_orders_map[o.order_id]["items"].append(item_data)
+
 
     return jsonify({
         "total_revenue": total_revenue,

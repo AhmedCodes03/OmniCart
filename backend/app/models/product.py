@@ -29,7 +29,11 @@ class Product(db.Model):
         db.Index("idx_category", "category_id"),
     )
 
+    def __init__(self, **kwargs):
+        super(Product, self).__init__(**kwargs)
+
     def to_dict(self):
+
         ratings = [r.rating for r in self.reviews]
         avg_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0
         
