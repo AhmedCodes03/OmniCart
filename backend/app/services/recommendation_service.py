@@ -82,24 +82,41 @@ def analyze_review_sentiment(text: str) -> dict:
 
 def get_svd_recommendations(user_id: str, product_ids: list, top_n: int = 5) -> list:
     try:
-        model = _load_svd()
-        tfidf = _load_tfidf()
-        if not model or not tfidf:
+        data = _load_svd()
+        if not data:
             return [(pid, 3.0) for pid in product_ids[:top_n]]
             
-        id_to_idx = tfidf["product_id_to_idx"]
+        user_id_map = data["user_id_map"]
+        product_id_map = data["product_id_map"]
+        user_factors = data["user_factors"]
+        item_factors = data["item_factors"]
+        global_mean = data.get("global_mean", 3.0)
+
+        # If user not in model, return items with neutral score
+        if str(user_id) not in user_id_map:
+            return [(pid, global_mean) for pid in product_ids[:top_n]]
+
+        u_idx = user_id_map[str(user_id)]
+        u_vector = user_factors[u_idx]
+
         scores = []
         for pid in product_ids:
-            # SVD model was trained on idx-based pseudo IDs for speed
-            idx = id_to_idx.get(pid, 0)
-            amazon_pid = f"B{str(idx).zfill(9)}"
-            pred = model.predict(str(user_id), amazon_pid)
-            scores.append((pid, round(pred.est, 4)))
+            # We use a pseudo-mapping to match OmniCart product IDs to Amazon IDs if needed, 
+            # but here we assume pid matches what's in product_id_map
+            if str(pid) in product_id_map:
+                i_idx = product_id_map[str(pid)]
+                i_vector = item_factors[i_idx]
+                score = np.dot(u_vector, i_vector)
+                scores.append((pid, round(float(score), 4)))
+            else:
+                scores.append((pid, global_mean))
+
         scores.sort(key=lambda x: x[1], reverse=True)
         return scores[:top_n]
     except Exception as e:
-        print(f"SVD error: {e}")
+        print(f"SVD prediction error: {e}")
         return [(pid, 3.0) for pid in product_ids[:top_n]]
+
 
 
 def get_hybrid_recommendations(customer_id: int, product_ids: list, recently_viewed_id: int = None, top_n: int = 5) -> list:

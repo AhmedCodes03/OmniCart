@@ -19,7 +19,9 @@ export default function ProductDetail() {
   const [similar, setSimilar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
+  const [reviewStats, setReviewStats] = useState({ avg_sentiment: 0.5, total_reviews: 0 });
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+
   const [submitting, setSubmitting] = useState(false);
 
   const formatPrice = (p) => new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', minimumFractionDigits: 0 }).format(p);
@@ -30,13 +32,39 @@ export default function ProductDetail() {
       API.get(`/products/${id}`),
       API.get(`/products/${id}/reviews`),
       API.get(`/recommendations/similar/${id}`).catch(() => ({ data: { similar: [] } })),
-    ]).then(([pRes, rRes, sRes]) => {
+    ]).then(async ([pRes, rRes, sRes]) => {
       setProduct(pRes.data);
       setReviews(rRes.data.reviews || []);
-      setSimilar(sRes.data.similar || []);
+      const similarProducts = sRes.data.similar || [];
+      setSimilar(similarProducts);
+      setReviewStats({
+        avg_sentiment: rRes.data.avg_sentiment,
+        total_reviews: rRes.data.total_reviews
+      });
+
+      // If logged in, fetch AI explanations for similar products
+      if (isAuthenticated && role === 'customer' && similarProducts.length > 0) {
+        const explained = await Promise.all(
+          similarProducts.slice(0, 3).map(async (p) => {
+            try {
+              const res = await API.post('/recommendations/explain', { product_id: p.product_id });
+              return { ...p, ai_explanation: res.data.explanation };
+            } catch { return p; }
+          })
+        );
+        setSimilar(prev => {
+          const updated = [...prev];
+          explained.forEach(exp => {
+            const idx = updated.findIndex(u => u.product_id === exp.product_id);
+            if (idx !== -1) updated[idx] = exp;
+          });
+          return updated;
+        });
+      }
     }).catch(() => toast.error('Product not found'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, isAuthenticated, role]);
+
 
   const handleReview = async (e) => {
     e.preventDefault();
@@ -207,12 +235,21 @@ export default function ProductDetail() {
                     </div>
                     <StarRating rating={r.rating} size={14} showNumber={false} />
                     {r.comment && <p className="text-surface-600 dark:text-surface-400 text-base mt-6 font-bold leading-relaxed">{r.comment}</p>}
+                    
+                    {/* AI Sentiment Badge */}
+                    <div className="mt-6 flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${r.sentiment_score >= 0.6 ? 'bg-emerald-500' : r.sentiment_score >= 0.4 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                      <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${r.sentiment_score >= 0.6 ? 'text-emerald-500' : r.sentiment_score >= 0.4 ? 'text-amber-500' : 'text-rose-500'}`}>
+                        {r.sentiment_score >= 0.6 ? 'Positive Feedback' : r.sentiment_score >= 0.4 ? 'Neutral Stance' : 'Critical Analysis'}
+                      </span>
+                    </div>
                   </div>
                 ))
               )}
             </div>
           </div>
         </div>
+
 
         <div className="space-y-16">
           <div className="flex items-center gap-4 mb-4">
@@ -223,9 +260,27 @@ export default function ProductDetail() {
           </div>
           <div className="space-y-10">
             {similar.slice(0, 4).map((p, i) => (
-              <ProductCard key={p.product_id} product={p} index={i} />
+              <div key={p.product_id} className="relative">
+                <ProductCard product={p} index={i} />
+                {p.ai_explanation && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-6 rounded-2xl glass-strong border border-primary-500/20 bg-primary-500/5 relative overflow-hidden"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <Cpu className="w-3 h-3 text-primary-500 animate-pulse" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary-500">AI Recommendation Reason</span>
+                    </div>
+                    <p className="text-[11px] text-surface-600 dark:text-surface-300 font-bold leading-relaxed italic">
+                      "{p.ai_explanation}"
+                    </p>
+                  </motion.div>
+                )}
+              </div>
             ))}
             {similar.length === 0 && (
+
               <div className="glass p-10 rounded-[30px] border border-surface-100 dark:border-white/5">
                 <p className="text-surface-600 dark:text-surface-400 font-bold uppercase tracking-widest text-[10px]">No related products found.</p>
               </div>

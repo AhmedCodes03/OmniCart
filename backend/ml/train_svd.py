@@ -1,20 +1,9 @@
-"""
-Step 14 — SVD Collaborative Filtering
-======================================
-Trains on Amazon Reviews dataset (UserId, ProductId, Score)
-Saves model to ml/svd_model.pkl for Flask API use.
-
-Run: python ml/train_svd.py
-"""
-
 import pandas as pd
 import numpy as np
 import pickle
 import os
 import sys
-from surprise import Dataset, Reader, SVD
-from surprise.model_selection import cross_validate
-from surprise import accuracy
+from sklearn.decomposition import TruncatedSVD
 
 # Add backend to path for app imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,87 +12,55 @@ from app import create_app
 # Config
 DATA_PATH = os.path.join(os.path.dirname(__file__), "Reviews.csv")
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "svd_model.pkl")
-MAP_PATH = os.path.join(os.path.dirname(__file__), "product_map.pkl")
 
 print("=" * 55)
-print("  OmniCart — SVD Collaborative Filtering Training")
+print("  OmniCart — SVD (via Scikit-Learn) Training")
 print("=" * 55)
 
 # Step 1: Load & Clean Data
 print("\n📂 Loading dataset...")
 if not os.path.exists(DATA_PATH):
-    print(f"❌ ERROR: {DATA_PATH} not found. Please provide a Reviews.csv file to train SVD.")
+    print(f"❌ ERROR: {DATA_PATH} not found.")
     sys.exit(1)
 
-df = pd.read_csv(DATA_PATH, usecols=["UserId", "ProductId", "Score"])
-print(f"   Raw rows     : {len(df):,}")
-
+# Loading a subset for stability; increase if you have >16GB RAM
+df = pd.read_csv(DATA_PATH, usecols=["UserId", "ProductId", "Score"], nrows=200000)
 df.dropna(inplace=True)
 df.drop_duplicates(subset=["UserId", "ProductId"], keep="last", inplace=True)
-print(f"   After clean  : {len(df):,}")
+print(f"   Rows loaded: {len(df):,}")
 
-# Step 2: Sample for speed
-if len(df) > 200000:
-    df = df.sample(n=200000, random_state=42)
-    print(f"   Sampled to   : {len(df):,} rows")
-
-# Step 3: Filter active users & products
+# Step 2: Filter for active users/products to reduce sparsity
 user_counts = df["UserId"].value_counts()
-product_counts = df["ProductId"].value_counts()
+prod_counts = df["ProductId"].value_counts()
+df = df[df["UserId"].isin(user_counts[user_counts >= 3].index)]
+df = df[df["ProductId"].isin(prod_counts[prod_counts >= 3].index)]
+print(f"   Filtered to {len(df):,} high-quality interactions.")
 
-df = df[
-    df["UserId"].isin(user_counts[user_counts >= 3].index) &
-    df["ProductId"].isin(product_counts[product_counts >= 3].index)
-]
-print(f"   After filter : {len(df):,} rows")
-print(f"   Unique users : {df['UserId'].nunique():,}")
-print(f"   Unique prods : {df['ProductId'].nunique():,}")
+# Step 3: Create Pivot Table
+print("🔢 Building User-Product Matrix...")
+user_item_matrix = df.pivot_table(index='UserId', columns='ProductId', values='Score').fillna(0)
+user_ids = user_item_matrix.index.tolist()
+product_ids = user_item_matrix.columns.tolist()
 
-# Step 4: Build product map
-product_ids = df["ProductId"].unique().tolist()
-product_map = {pid: idx for idx, pid in enumerate(product_ids)}
-print(f"\n🗺️  Product map  : {len(product_map):,} products indexed")
+# Step 4: Train SVD
+print("🤖 Decomposing Matrix (SVD)...")
+n_factors = min(50, user_item_matrix.shape[1] - 1)
+svd = TruncatedSVD(n_components=n_factors, random_state=42)
+user_factors = svd.fit_transform(user_item_matrix)
+item_factors = svd.components_.T
 
-# Step 5: Train SVD
-print("\n🤖 Training SVD model...")
-reader = Reader(rating_scale=(1, 5))
-data = Dataset.load_from_df(df[["UserId", "ProductId", "Score"]], reader)
+# Step 5: Save Model
+# We save the factors and maps so the API can calculate scores instantly
+payload = {
+    "user_factors": user_factors,
+    "item_factors": item_factors,
+    "user_id_map": {uid: i for i, uid in enumerate(user_ids)},
+    "product_id_map": {pid: i for i, pid in enumerate(product_ids)},
+    "global_mean": df["Score"].mean()
+}
 
-print("   Running 3-fold cross-validation...")
-results = cross_validate(
-    SVD(n_factors=50, n_epochs=20, random_state=42),
-    data,
-    measures=["RMSE", "MAE"],
-    cv=3,
-    verbose=False
-)
-print(f"   RMSE: {results['test_rmse'].mean():.4f} ± {results['test_rmse'].std():.4f}")
-print(f"   MAE : {results['test_mae'].mean():.4f} ± {results['test_mae'].std():.4f}")
-
-print("\n   Training final model on full data...")
-trainset = data.build_full_trainset()
-model = SVD(n_factors=50, n_epochs=20, random_state=42)
-model.fit(trainset)
-print("   ✅ Training complete!")
-
-# Step 6: Save model
 with open(MODEL_PATH, "wb") as f:
-    pickle.dump(model, f)
-with open(MAP_PATH, "wb") as f:
-    pickle.dump({"product_ids": product_ids, "product_map": product_map}, f)
+    pickle.dump(payload, f)
 
-print(f"\n💾 Model saved  : {MODEL_PATH}")
-print(f"💾 Map saved    : {MAP_PATH}")
-
-# Step 7: Quick test
-print("\n🧪 Quick prediction test...")
-sample_user = df["UserId"].iloc[0]
-sample_product = df["ProductId"].iloc[0]
-pred = model.predict(sample_user, sample_product)
-print(f"   User    : {sample_user}")
-print(f"   Product : {sample_product}")
-print(f"   Predicted rating: {pred.est:.2f} (actual: {pred.r_ui})")
-
-print("\n" + "=" * 55)
-print("  ✅ SVD model ready for Flask integration (Step 17)")
+print(f"\n✅ Model saved: {MODEL_PATH}")
 print("=" * 55)

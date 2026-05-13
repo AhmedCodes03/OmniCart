@@ -5,7 +5,9 @@ import { ArrowRight, Sparkles, TrendingUp, Shield, Cpu, ShoppingBag, Star, Zap, 
 import API from '../api/axios';
 import ProductCard from '../components/products/ProductCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useAuth } from '../context/AuthContext';
 import BorderGlow from '../components/ui/BorderGlow';
+
 
 /* ─── Hero ─── */
 function Hero() {
@@ -248,7 +250,49 @@ function TrendingProducts() {
   );
 }
 
+function RecommendedProducts() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    API.get('/recommendations/')
+      .then((res) => {
+        const items = res.data.recommendations || [];
+        setProducts(items.map(i => i.product).filter(Boolean));
+      })
+      .catch(() => { })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (products.length === 0) return null;
+
+  return (
+    <section className="section-padding py-20 relative">
+      <div className="flex flex-col sm:flex-row justify-between items-end mb-20 gap-12 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary-500 mb-8 block">Personalized Picks</span>
+          <h2 className="text-6xl sm:text-7xl font-black text-surface-900 dark:text-white tracking-tighter">
+            Recommended <br /> <span className="text-surface-400">For You.</span>
+          </h2>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
+        {products.map((product, i) => (
+          <ProductCard key={product.product_id} product={product} index={i} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ─── Features ─── */
+
 function FeaturesSection() {
   const features = [
     {
@@ -335,12 +379,16 @@ function FeaturesSection() {
 
 /* ─── Home Page ─── */
 export default function Home() {
+  const { isAuthenticated, role } = useAuth();
+
   return (
     <div className="overflow-x-hidden selection:bg-primary-500 selection:text-white relative">
       <Hero />
       <CategoryShowcase />
       <TrendingProducts />
+      {isAuthenticated && role === 'customer' && <RecommendedProducts />}
       <FeaturesSection />
+
 
       {/* Studio Final CTA */}
       <section className="section-padding py-20">
